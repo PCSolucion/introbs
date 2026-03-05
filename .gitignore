@@ -1,4 +1,4 @@
-fondos/
+fondos/*.mp4
 firebase.js
 node_modules/
 .DS_Store
