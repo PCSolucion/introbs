@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stream Intro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background Layer (Optional extra glow) -->
+  <div class="bg-layer">
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+  </div>
+
+  <!-- Video Background System -->
+  <div class="video-background-container">
+    <video id="bgVideo1" class="bg-video active" autoplay muted playsinline loop></video>
+    <video id="bgVideo2" class="bg-video" autoplay muted playsinline loop></video>
+  </div>
+
+  <!-- Main HUD Layout -->
+  <div class="game-hud">
+    <div class="hud-body">
+      
+      <!-- LEFT: Menu panel -->
+      <section class="hud-panel">
+        <div class="panel-list" id="menuList">
+          <!-- JS populate: Menu navigation (Horario, Top Canal, etc.) -->
+        </div>
+      </section>
+
+      <!-- RIGHT: Dynamic Content panel -->
+      <section class="hud-panel">
+        <div class="panel-list" id="contentArea">
+          <!-- JS populate based on active menu item -->
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module" src="script.js?v=1.1"></script>
+</body>
+</html>
