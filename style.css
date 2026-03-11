@@ -109,8 +109,8 @@ html, body {
 .hud-panel {
   flex: 1;
   background: var(--bg-panel);
-  backdrop-filter: blur(11px);
-  -webkit-backdrop-filter: blur(11px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: none;
   box-shadow: none !important; /* Sin sombras en bordes */
   display: flex; flex-direction: column;

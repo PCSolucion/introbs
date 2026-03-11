@@ -40,11 +40,11 @@ console.log('[ENGINE] Script inicializado');
   };
 
   const SCHEDULE = {
-    lunes:    { game: 'Red Dead Redemption',     time: '20:00' },
-    martes:   { game: 'Red Dead Redemption',     time: '20:00' },
-    miercoles:{ game: 'Night of the Dead',       time: '20:00' },
-    jueves:   { game: 'Red Dead Redemption',     time: '20:00' },
-    viernes:  { game: 'Red Dead Redemption',     time: '19:00' },
+    lunes:    { game: 'BioShock',     time: '20:00' },
+    martes:   { game: 'BioShock',     time: '20:00' },
+    miercoles:{ game: 'BioShock',       time: '20:00' },
+    jueves:   { game: 'BioShock',     time: '20:00' },
+    viernes:  { game: 'BioShock',     time: '19:00' },
   };
   const DAY_NAMES = {
     lunes: 'LUNES', martes: 'MARTES', miercoles: 'MIÉRCOLES',
@@ -470,9 +470,9 @@ console.log('[ENGINE] Script inicializado');
   // ─── CACHE SYSTEM (localStorage) ──────
   // Expiración: 12 horas en milisegundos
   const CACHE_TTL = 12 * 60 * 60 * 1000;
-  const CACHE_KEY_USERS = 'introbs_cache_users';
-  const CACHE_KEY_STREAMS = 'introbs_cache_streams';
-  const CACHE_KEY_TIMESTAMP = 'introbs_cache_ts';
+  const CACHE_KEY_USERS = 'introbs_cache_users_v2';
+  const CACHE_KEY_STREAMS = 'introbs_cache_streams_v2';
+  const CACHE_KEY_TIMESTAMP = 'introbs_cache_ts_v2';
 
   function isCacheValid() {
     const ts = localStorage.getItem(CACHE_KEY_TIMESTAMP);
@@ -513,16 +513,41 @@ console.log('[ENGINE] Script inicializado');
     } else if (typeof possibleHistory === 'object') {
       streams = Object.keys(possibleHistory).map(key => ({ _docId: key, ...possibleHistory[key] }));
     }
-    return streams.sort((a, b) => {
-      const getT = (obj) => {
-        const d = obj.date || obj.timestamp || obj.createdAt || obj.fecha;
-        if (d?.seconds) return d.seconds * 1000;
-        if (d) return new Date(d).getTime();
-        if (obj._docId) { const p = new Date(obj._docId); return isNaN(p) ? 0 : p.getTime(); }
-        return 0;
-      };
-      return getT(b) - getT(a);
-    }).slice(0, 5);
+
+    const getT = (obj) => {
+      const d = obj.date || obj.timestamp || obj.createdAt || obj.fecha;
+      if (d?.seconds) return d.seconds * 1000;
+      if (d) { 
+        const t = new Date(d).getTime(); 
+        if (!isNaN(t)) return t; 
+      }
+      if (obj._docId) { 
+        const t = new Date(obj._docId).getTime(); 
+        if (!isNaN(t)) return t; 
+      }
+      return 0;
+    };
+
+    // Filtrar duplicados por nombre, manteniendo únicamente el de la fecha más antigua (apertura)
+    const uniqueMap = new Map();
+    streams.forEach(s => {
+      // Normalización agresiva: mayúsculas, sin espacios extra y sin caracteres de control
+      const rawTitle = (s.title || s.name || s.nombre || 'SIN TÍTULO');
+      const normalizedName = rawTitle.toString().toUpperCase().trim().replace(/\s+/g, ' ');
+      const t = getT(s);
+      
+      // Si no existe el nombre o si encontramos una fecha más antigua, actualizamos el mapa
+      if (!uniqueMap.has(normalizedName) || (t > 0 && t < uniqueMap.get(normalizedName)._t)) {
+        uniqueMap.set(normalizedName, { ...s, _t: t });
+      }
+    });
+
+    const result = Array.from(uniqueMap.values())
+      .sort((a, b) => b._t - a._t)
+      .slice(0, 5);
+
+    console.log('[ENGINE] Streams procesados (sin duplicados, fecha apertura):', result.length);
+    return result;
   }
 
   function applyData(users, streams) {
