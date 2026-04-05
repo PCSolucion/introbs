@@ -40,11 +40,11 @@ console.log('[ENGINE] Script inicializado');
   };
 
   const SCHEDULE = {
-    lunes:    { game: 'BioShock',     time: '20:00' },
-    martes:   { game: 'BioShock',     time: '20:00' },
-    miercoles:{ game: 'BioShock',       time: '20:00' },
-    jueves:   { game: 'BioShock',     time: '20:00' },
-    viernes:  { game: 'BioShock',     time: '19:00' },
+    lunes:    { game: 'God of War Ragnarok',     time: '20:00' },
+    martes:   { game: 'God of War Ragnarok',     time: '20:00' },
+    miercoles:{ game: 'God of War Ragnarok',       time: '20:00' },
+    jueves:   { game: 'God of War Ragnarok',     time: '20:00' },
+    viernes:  { game: 'God of War Ragnarok',     time: '19:00' },
   };
   const DAY_NAMES = {
     lunes: 'LUNES', martes: 'MARTES', miercoles: 'MIÉRCOLES',
@@ -56,8 +56,6 @@ console.log('[ENGINE] Script inicializado');
     { id: 'topcanal',  title: 'TOP',        sub: 'Community Feed' },
     { id: 'item1',     title: 'ÚLTIMOS DIRECTOS', sub: 'Archive' },
     { id: 'item2',     title: 'SUSCRIPTORES', sub: 'VETERANOS' },
-    { id: 'item3',     title: 'VOTACIONES', sub: 'Community Polls' },
-    { id: 'item4',     title: 'PREDICCIONES', sub: 'Top Predictions' },
   ];
 
   // ─── DOM REFS ───────────────────────────
@@ -69,7 +67,6 @@ console.log('[ENGINE] Script inicializado');
   let allUsers = [];
   let recentStreams = [];
   let veteransIndex = 0;
-  let predictionIndex = 0;
   let feedQueue = [];
   let feedIndex = 0;
 
@@ -148,10 +145,6 @@ console.log('[ENGINE] Script inicializado');
         veteransIndex = 0; 
         renderVeterans(); 
         break;
-      case 'item4':    
-        predictionIndex = 0;
-        renderPredictions(); 
-        break;
       default: renderPlaceholder(activeItem.title);
     }
   }
@@ -163,71 +156,7 @@ console.log('[ENGINE] Script inicializado');
     return name;
   }
 
-  // Helper para obtener aciertos de predicciones (maneja anidamiento como stats.prediction_wins)
-  function getPredictionWins(u) {
-    if (!u) return 0;
-    // 1. Nivel superior
-    if (u.prediction_wins !== undefined) return Number(u.prediction_wins);
-    if (u.predictions_wins !== undefined) return Number(u.predictions_wins);
-    // 2. Anidado en stats (común en este proyecto)
-    if (u.stats) {
-      if (u.stats.prediction_wins !== undefined) return Number(u.stats.prediction_wins);
-      if (u.stats.predictions_wins !== undefined) return Number(u.stats.predictions_wins);
-    }
-    // 3. Fallback manual por si acaso
-    for (let k in u) {
-      if (k.toLowerCase().includes('pred') && k.toLowerCase().includes('win')) return Number(u[k]);
-    }
-    return 0;
-  }
 
-  function renderPredictions() {
-    if (allUsers.length === 0) {
-      renderPlaceholder('CARGANDO DATOS...');
-      return;
-    }
-
-    const filtered = allUsers.filter(u => {
-      const name = (u.displayName || u._id || '').toLowerCase();
-      return name !== 'liiukiin' && getPredictionWins(u) > 0;
-    });
-    
-    console.log(`[INTRO] Predicciones: ${filtered.length} usuarios encontrados con aciertos de un total de ${allUsers.length}.`);
-    
-    const sorted = [...filtered].sort((a, b) => getPredictionWins(b) - getPredictionWins(a));
-
-    if (sorted.length === 0) {
-      renderPlaceholder('SIN ACERTANTES REGISTRADOS');
-      return;
-    }
-
-    const MAX = 5;
-    const chunk = sorted.slice(0, MAX); // Siempre los 5 primeros
-
-    chunk.forEach((u, i) => {
-      const row = document.createElement('div');
-      row.className = `schedule-row feed-enter ${i === 0 ? 'active' : ''}`;
-      row.style.animationDelay = `${i * 0.1}s`;
-      const name = formatDisplayName(u);
-      const wins = getPredictionWins(u);
-      const title = getTitle(u.level || 1);
-
-      row.innerHTML = `
-        <div class="sch-day-box">
-          <span class="sch-day-short">#${predictionIndex + i + 1}</span>
-        </div>
-        <div class="sch-main-info">
-          <div class="sch-header">
-            <span class="sch-time">${name}</span>
-            <span class="sch-badge">${wins} ACERTADAS</span>
-          </div>
-          <span class="sch-game">${title}</span>
-        </div>
-        <div class="sch-decor">PRED_0${predictionIndex + i + 1}</div>
-      `;
-      contentArea.appendChild(row);
-    });
-  }
 
   function renderVeterans() {
     if (allUsers.length === 0) {
@@ -412,15 +341,6 @@ console.log('[ENGINE] Script inicializado');
       });
       if (filtered.length > 0) {
         veteransIndex = (veteransIndex + 5) % filtered.length;
-      }
-    }
-    if (activeItem.id === 'item4') {
-      const filtered = allUsers.filter(u => {
-        const name = (u.displayName || u._id || '').toLowerCase();
-        return name !== 'liiukiin' && getPredictionWins(u) > 0;
-      });
-      if (filtered.length > 0) {
-        predictionIndex = (predictionIndex + 5) % filtered.length;
       }
     }
 
