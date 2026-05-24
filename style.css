@@ -5,8 +5,8 @@
    ═══════════════════════════════════════════════════════ */
 
 :root {
-  --cyber-red: #ff3b45;
-  --cyber-red-rgb: 255, 59, 69;
+  --cyber-red: #008ec2;
+  --cyber-red-rgb: 0, 142, 194;
   --cyber-yellow: #dbbe3b;
   --cyber-yellow-rgb: 219, 190, 59;
   --takeru-yellow: #fcee09;
@@ -27,7 +27,7 @@
   --font-ui: 'Rajdhani', sans-serif;
   --font-mono: 'Share Tech Mono', monospace;
 
-  --glow-red: 0 0 4px var(--cyber-red), 0 0 12px rgba(var(--cyber-red-rgb), 0.25);
+  --glow-red: 0 0 4px var(--cyber-red), 0 0 14px rgba(var(--cyber-red-rgb), 0.35);
   --glow-cyan: 0 0 4px var(--cyber-cyan), 0 0 12px rgba(var(--cyber-cyan-rgb), 0.2);
 }
 
@@ -232,7 +232,7 @@ html, body {
 
 .card-item.active {
   border: none !important;
-  border-left: 3px solid rgba(var(--cyber-red-rgb), 0.7) !important; /* Borde rojo izquierdo */
+  border-left: 3px solid rgba(var(--cyber-red-rgb), 0.7) !important; /* Borde acento izquierdo */
   background: rgba(var(--cyber-red-rgb), 0.15);
   backdrop-filter: blur(4px);
   padding-left: 0 !important;

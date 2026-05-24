@@ -33,18 +33,19 @@ console.log('[ENGINE] Script inicializado');
       'fondos/isabela.mp4', 'fondos/bloodborne.mp4', 'fondos/ciri.mp4', 'fondos/claire.mp4',
       'fondos/geral.mp4', 'fondos/grace.mp4', 'fondos/gustave.mp4', 'fondos/jill.mp4',
       'fondos/karlach.mp4', 'fondos/laezel.mp4', 'fondos/leon.mp4', 'fondos/lune.mp4',
-      'fondos/maelle.mp4', 'fondos/senua.mp4', 'fondos/shadow.mp4', 'fondos/triss.mp4', 'fondos/yenn.mp4'
+      'fondos/maelle.mp4', 'fondos/senua.mp4', 'fondos/shadow.mp4', 'fondos/triss.mp4', 
+      'fondos/yenn.mp4', 'fondos/kratos.mp4'
     ].sort(() => Math.random() - 0.5),
     bgInterval: 15000,
     menuInterval: 20000, 
   };
 
   const SCHEDULE = {
-    lunes:    { game: 'God of War Ragnarok',     time: '20:00' },
-    martes:   { game: 'God of War Ragnarok',     time: '20:00' },
-    miercoles:{ game: 'God of War Ragnarok',       time: '20:00' },
-    jueves:   { game: 'God of War Ragnarok',     time: '20:00' },
-    viernes:  { game: 'God of War Ragnarok',     time: '19:00' },
+    lunes:    { game: 'Fable Anniversary',     time: '20:00' },
+    martes:   { game: 'Fable Anniversary',     time: '20:00' },
+    miercoles:{ game: 'Fable Anniversary',     time: '20:00' },
+    jueves:   { game: 'Fable Anniversary',     time: '20:00' },
+    viernes:  { game: 'Fable Anniversary',     time: '20:00' },
   };
   const DAY_NAMES = {
     lunes: 'LUNES', martes: 'MARTES', miercoles: 'MIÉRCOLES',
@@ -52,7 +53,7 @@ console.log('[ENGINE] Script inicializado');
   };
 
   const MENU_ITEMS = [
-    { id: 'horario',   title: 'HORARIOS',   sub: 'Stream Schedule' },
+    // { id: 'horario',   title: 'HORARIOS',   sub: 'Stream Schedule' }, // OCULTO TEMPORALMENTE
     { id: 'topcanal',  title: 'TOP',        sub: 'Community Feed' },
     { id: 'item1',     title: 'ÚLTIMOS DIRECTOS', sub: 'Archive' },
     { id: 'item2',     title: 'SUSCRIPTORES', sub: 'VETERANOS' },
@@ -158,6 +159,13 @@ console.log('[ENGINE] Script inicializado');
 
 
 
+  // Helper para extraer los meses de suscripción probando múltiples nombres de campo
+  function getSubMonths(u) {
+    return u.subMonths || u.months || u.sub_months || u.monthsSubscribed
+      || u.tenure || u.subCount || u.subscriptionMonths || u.totalMonths
+      || u.cumulative_months || u.cumulativeMonths || 0;
+  }
+
   function renderVeterans() {
     if (allUsers.length === 0) {
       renderPlaceholder('CARGANDO DATOS...');
@@ -166,11 +174,11 @@ console.log('[ENGINE] Script inicializado');
     // Todos los que tengan al menos 1 mes (sin liiukiin)
     const filtered = allUsers.filter(u => {
       const name = (u.displayName || u._id || '').toLowerCase();
-      return name !== 'liiukiin' && (u.subMonths || u.months || 0) > 0;
+      return name !== 'liiukiin' && getSubMonths(u) > 0;
     });
     
     // Ordenar por meses
-    const sorted = [...filtered].sort((a, b) => (b.subMonths || b.months || 0) - (a.subMonths || a.months || 0));
+    const sorted = [...filtered].sort((a, b) => getSubMonths(b) - getSubMonths(a));
 
     if (sorted.length === 0) {
       renderPlaceholder('SIN DATOS DE SUBS');
@@ -185,7 +193,7 @@ console.log('[ENGINE] Script inicializado');
       row.className = `schedule-row feed-enter ${i === 0 ? 'active' : ''}`;
       row.style.animationDelay = `${i * 0.1}s`;
       const name = formatDisplayName(u);
-      const months = u.subMonths || u.months || 0;
+      const months = getSubMonths(u);
       const title = getTitle(u.level || 1);
 
       row.innerHTML = `
@@ -228,7 +236,7 @@ console.log('[ENGINE] Script inicializado');
         ? dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }) 
         : '--/--';
 
-      const title = (s.title || s.name || s.nombre || 'SIN TÍTULO').toUpperCase();
+      const title = (s._resolvedTitle || s.title || s.name || s.nombre || s.titulo || s.streamTitle || s.stream_title || s.label || 'SIN TÍTULO').toUpperCase();
       const category = (s.category || s.game || s.categoria || 'VARIEDAD').toUpperCase();
 
       row.innerHTML = `
@@ -388,11 +396,11 @@ console.log('[ENGINE] Script inicializado');
   }
 
   // ─── CACHE SYSTEM (localStorage) ──────
-  // Expiración: 12 horas en milisegundos
-  const CACHE_TTL = 12 * 60 * 60 * 1000;
-  const CACHE_KEY_USERS = 'introbs_cache_users_v2';
-  const CACHE_KEY_STREAMS = 'introbs_cache_streams_v2';
-  const CACHE_KEY_TIMESTAMP = 'introbs_cache_ts_v2';
+  // Expiración: 1 hora en milisegundos (para mantener datos de subs actualizados)
+  const CACHE_TTL = 1 * 60 * 60 * 1000;
+  const CACHE_KEY_USERS = 'introbs_cache_users_v4';
+  const CACHE_KEY_STREAMS = 'introbs_cache_streams_v4';
+  const CACHE_KEY_TIMESTAMP = 'introbs_cache_ts_v4';
 
   function isCacheValid() {
     const ts = localStorage.getItem(CACHE_KEY_TIMESTAMP);
@@ -434,6 +442,40 @@ console.log('[ENGINE] Script inicializado');
       streams = Object.keys(possibleHistory).map(key => ({ _docId: key, ...possibleHistory[key] }));
     }
 
+    // Log de depuración: muestra las claves del primer stream para detectar el nombre del campo
+    if (streams.length > 0) {
+      console.log('[ENGINE] Campos disponibles en el primer stream:', Object.keys(streams[0]));
+      console.log('[ENGINE] Primer stream completo:', JSON.stringify(streams[0]));
+    }
+
+    // Detecta si un string parece un título válido (descarta IDs, errores SQL, códigos largos)
+    const isTitleValid = (str) => {
+      if (!str || typeof str !== 'string') return false;
+      const s = str.trim();
+      if (s === '') return false;
+      // Rechazar si parece un código SQL (ej: "HY000", "08S01", "SQLSTATE ...", etc.)
+      if (/sqlstate/i.test(s)) return false;
+      // Rechazar si parece un UUID o hash largo (solo hex/guiones, >12 chars)
+      if (/^[0-9a-f\-]{12,}$/i.test(s)) return false;
+      // Rechazar si contiene mensajes de error típicos de BD
+      if (/(error|exception|failed|invalid|undefined|null)/i.test(s) && s.length > 40) return false;
+      // Rechazar strings extremadamente largos que no son títulos
+      if (s.length > 150) return false;
+      return true;
+    };
+
+    // Función auxiliar para extraer el título del stream probando múltiples campos posibles
+    const getTitle = (obj) => {
+      const candidates = [
+        obj.title, obj.name, obj.nombre, obj.titulo, obj.streamTitle,
+        obj.stream_title, obj.gameName, obj.game_name, obj.label, obj.descripcion
+      ];
+      for (const c of candidates) {
+        if (isTitleValid(c)) return c.trim();
+      }
+      return null;
+    };
+
     const getT = (obj) => {
       const d = obj.date || obj.timestamp || obj.createdAt || obj.fecha;
       if (d?.seconds) return d.seconds * 1000;
@@ -451,14 +493,17 @@ console.log('[ENGINE] Script inicializado');
     // Filtrar duplicados por nombre, manteniendo únicamente el de la fecha más antigua (apertura)
     const uniqueMap = new Map();
     streams.forEach(s => {
-      // Normalización agresiva: mayúsculas, sin espacios extra y sin caracteres de control
-      const rawTitle = (s.title || s.name || s.nombre || 'SIN TÍTULO');
-      const normalizedName = rawTitle.toString().toUpperCase().trim().replace(/\s+/g, ' ');
+      const rawTitle = getTitle(s) || 'SIN TÍTULO';
+      
+      // Filtrar directos que contengan "test" (insensible a mayúsculas)
+      if (rawTitle.toLowerCase().includes('test')) return;
+
+      const normalizedName = rawTitle.toUpperCase().trim().replace(/\s+/g, ' ');
       const t = getT(s);
       
       // Si no existe el nombre o si encontramos una fecha más antigua, actualizamos el mapa
       if (!uniqueMap.has(normalizedName) || (t > 0 && t < uniqueMap.get(normalizedName)._t)) {
-        uniqueMap.set(normalizedName, { ...s, _t: t });
+        uniqueMap.set(normalizedName, { ...s, _docId: s._docId, _t: t, _resolvedTitle: rawTitle });
       }
     });
 
@@ -483,6 +528,17 @@ console.log('[ENGINE] Script inicializado');
     const users = [];
     userSnapshot.forEach(d => { const data = d.data(); data._id = d.id; users.push(data); });
     console.log(`[FIREBASE] ${users.length} usuarios descargados`);
+    // Log de depuración: muestra campos del primer usuario con meses de sub
+    const firstSub = users.find(u => {
+      const keys = Object.keys(u);
+      return keys.some(k => /month|sub|tenure/i.test(k));
+    });
+    if (firstSub) {
+      console.log('[SUB DEBUG] Campos del primer usuario con sub:', Object.keys(firstSub));
+      console.log('[SUB DEBUG] Datos completos:', JSON.stringify(firstSub));
+    } else {
+      console.warn('[SUB DEBUG] Ningún usuario tiene campos de tipo mes/sub/tenure');
+    }
 
     const docRef = doc(db, 'system', 'stream_history');
     const docSnap = await getDoc(docRef);
