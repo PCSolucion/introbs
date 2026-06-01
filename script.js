@@ -6,6 +6,7 @@
 
 import { db } from './firebase.js';
 import { collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js';
+import { RAWG_API_KEY } from './api-keys.js';
 
 console.log('[ENGINE] Script inicializado');
 
@@ -27,7 +28,6 @@ console.log('[ENGINE] Script inicializado');
     return `EDGE RUNNER LVL ${level}`;
   }
 
-  // ─── CONFIG ─────────────────────────────
   const CONFIG = {
     backgrounds: [
       'fondos/isabela.mp4', 'fondos/bloodborne.mp4', 'fondos/ciri.mp4', 'fondos/claire.mp4',
@@ -38,14 +38,33 @@ console.log('[ENGINE] Script inicializado');
     ].sort(() => Math.random() - 0.5),
     bgInterval: 15000,
     menuInterval: 20000, 
+    countdownMinutes: 5, // Duración de la cuenta atrás
   };
 
+  const gameImageCache = {};
+
+  async function getGameImage(gameName) {
+    if (gameImageCache[gameName]) return gameImageCache[gameName];
+    try {
+      const res = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(gameName)}&page_size=1`);
+      const data = await res.json();
+      if (data.results && data.results.length > 0 && data.results[0].background_image) {
+        gameImageCache[gameName] = data.results[0].background_image;
+        return data.results[0].background_image;
+      }
+    } catch (e) {
+      console.error('Error fetching game image', e);
+    }
+    return '';
+  }
+
+  // Estructura fácil de modificar: un arreglo de juegos por cada día
   const SCHEDULE = {
-    lunes:    { game: 'Fable Anniversary',     time: '20:00' },
-    martes:   { game: 'Fable Anniversary',     time: '20:00' },
-    miercoles:{ game: 'Fable Anniversary',     time: '20:00' },
-    jueves:   { game: 'Fable Anniversary',     time: '20:00' },
-    viernes:  { game: 'Fable Anniversary',     time: '20:00' },
+    lunes:    [ { game: 'Once Human', time: '17:00 - 21:00' }, { game: 'Metro 2033', time: '22:00 - 01:00' } ],
+    martes:   [ { game: 'Once Human', time: '17:00 - 21:00' }, { game: 'Metro 2033', time: '22:00 - 01:00' } ],
+    miercoles:[ { game: 'Once Human', time: '17:00 - 21:00' }, { game: 'Metro 2033', time: '22:00 - 01:00' } ],
+    jueves:   [ { game: 'Once Human', time: '17:00 - 21:00' }, { game: 'Metro 2033', time: '22:00 - 01:00' } ],
+    viernes:  [ { game: 'Once Human', time: '17:00 - 21:00' }, { game: 'Metro 2033', time: '22:00 - 01:00' } ],
   };
   const DAY_NAMES = {
     lunes: 'LUNES', martes: 'MARTES', miercoles: 'MIÉRCOLES',
@@ -53,7 +72,7 @@ console.log('[ENGINE] Script inicializado');
   };
 
   const MENU_ITEMS = [
-    // { id: 'horario',   title: 'HORARIOS',   sub: 'Stream Schedule' }, // OCULTO TEMPORALMENTE
+    { id: 'horario',   title: 'HORARIOS',   sub: 'Stream Schedule' },
     { id: 'topcanal',  title: 'TOP',        sub: 'Community Feed' },
     { id: 'item1',     title: 'ÚLTIMOS DIRECTOS', sub: 'Archive' },
     { id: 'item2',     title: 'SUSCRIPTORES', sub: 'VETERANOS' },
@@ -257,30 +276,154 @@ console.log('[ENGINE] Script inicializado');
   }
 
   function renderSchedule() {
-    const todayIdx = new Date().getDay();
+    const today = new Date();
+    let todayIdx = today.getDay(); // 0 is Sunday, 1 is Monday...
+    if (todayIdx === 0) todayIdx = 7; // Si es domingo, lo contamos como 7 para la lógica de la semana
+
+    // Calculamos el lunes de esta semana
+    const mondayDate = new Date(today);
+    mondayDate.setDate(today.getDate() - (todayIdx - 1));
+
     const dayKeys = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
     const todayKey = dayKeys[todayIdx - 1] || null;
 
-    Object.entries(SCHEDULE).forEach(([k, d], i) => {
+    // Obtenemos los números de día del mes y el nombre del mes para cada día
+    const weekDates = dayKeys.map((key, index) => {
+       const d = new Date(mondayDate);
+       d.setDate(mondayDate.getDate() + index);
+       const dayStr = d.getDate().toString().padStart(2, '0');
+       let monthStr = d.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase().replace('.', '');
+       return { day: dayStr, month: monthStr };
+    });
+
+    // Contenedor maestro con un nuevo diseño que ocupa todo el alto
+    const scheduleContainer = document.createElement('div');
+    scheduleContainer.style.display = 'flex';
+    scheduleContainer.style.flexDirection = 'column';
+    scheduleContainer.style.padding = '0 20px 20px 0';
+    
+    // TRUCO: Bajamos bastante el contenedor usando menos margen negativo
+    scheduleContainer.style.marginTop = '-120px'; // Bajado de -230px a -120px
+    scheduleContainer.style.height = 'calc(100vh - 250px)'; // Reducimos el alto máximo para que no se salga por abajo
+    scheduleContainer.style.justifyContent = 'space-between'; // Distribuir filas uniformemente
+
+    Object.entries(SCHEDULE).forEach(([k, gamesList], i) => {
       const active = k === todayKey;
-      const el = document.createElement('div');
-      el.className = `schedule-row feed-enter ${active ? 'active' : ''}`;
-      el.style.animationDelay = `${i * 0.1}s`;
-      el.innerHTML = `
-        <div class="sch-day-box">
-          <span class="sch-day-short">${DAY_NAMES[k].substring(0, 3)}</span>
-          <span class="sch-status"></span>
+      const dateObj = weekDates[i]; 
+      // Mostramos solo el número si es HOY, y el número + mes si es otro día
+      const displayDate = active ? dateObj.day : `${dateObj.day} ${dateObj.month}`;
+      
+      const dayRow = document.createElement('div');
+      dayRow.className = 'feed-enter';
+      dayRow.style.animationDelay = `${i * 0.1}s`;
+      dayRow.style.display = 'flex';
+      dayRow.style.alignItems = 'center';
+      dayRow.style.gap = '30px'; // Separación horizontal entre etiqueta y cartas
+      dayRow.style.flex = '1'; // Hace que cada día ocupe una fracción del alto total
+      dayRow.style.paddingBottom = '25px'; // Separación vertical entre días
+
+      // Etiqueta del día (Izquierda)
+      const dayLabel = document.createElement('div');
+      dayLabel.style.width = '125px'; // Reducido de 140px
+      dayLabel.style.textAlign = 'right';
+      dayLabel.style.flexShrink = '0';
+      dayLabel.innerHTML = `
+        <div style="font-family: var(--font-title); font-size: ${active ? '1.8rem' : '1.3rem'}; font-weight: 800; color: ${active ? 'var(--cyber-red)' : 'rgba(255,255,255,0.3)'}; letter-spacing: 1px; transition: all 0.3s ease; text-transform: uppercase; text-shadow: ${active ? '0 0 15px rgba(var(--cyber-red-rgb), 0.5)' : 'none'};">
+          ${DAY_NAMES[k]} <span style="font-family: var(--font-mono); font-size: ${active ? '1.5rem' : '1rem'}; color: ${active ? '#fff' : 'rgba(255,255,255,0.2)'};">${displayDate}</span>
         </div>
-        <div class="sch-main-info">
-          <div class="sch-header">
-            <span class="sch-time">${d.time}</span>
-            ${active ? '<span class="sch-badge">ONLINE</span>' : '<span class="sch-badge standby">STANDBY</span>'}
-          </div>
-          <span class="sch-game">${d.game}</span>
-        </div>
-        <div class="sch-decor">00${i+1}</div>
+        ${active ? '<div style="font-family: var(--font-mono); font-size: 0.9rem; background: var(--cyber-red); color: #fff; padding: 2px 10px; display: inline-block; margin-top: 4px; font-weight: bold; letter-spacing: 1px; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);">HOY</div>' : ''}
       `;
-      contentArea.appendChild(el);
+      dayRow.appendChild(dayLabel);
+
+      // Contenedor de juegos (Derecha)
+      const gamesCol = document.createElement('div');
+      gamesCol.style.flex = '1';
+      gamesCol.style.display = 'flex';
+      gamesCol.style.gap = '30px'; // Separación horizontal entre cartas del mismo día
+
+      gamesList.forEach(g => {
+        const gameCard = document.createElement('div');
+        gameCard.style.flex = '1';
+        gameCard.style.height = '100%'; // Ocupa toda la altura disponible de su fila
+        gameCard.style.minHeight = '140px'; // Evita que se aplaste mucho
+        gameCard.style.position = 'relative';
+        gameCard.style.background = 'transparent'; // Quitamos el fondo negro
+        gameCard.style.boxShadow = active ? '0 0 25px rgba(var(--cyber-red-rgb), 0.2)' : 'none'; // Sin sombra oscura artificial en los inactivos
+        // Esquinas biseladas para toque tech
+        gameCard.style.clipPath = 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)';
+
+        const timeParts = g.time.split('-');
+        const startTimeStr = timeParts[0] ? timeParts[0].trim() : g.time;
+        const endTimeStr = timeParts[1] ? timeParts[1].trim() : '';
+
+        gameCard.innerHTML = `
+          <!-- Imagen con efecto de zoom suave al cargar -->
+          <img class="sch-new-img" data-game="${g.game}" data-active="${active}" src="" style="
+            position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.8s ease, transform 15s linear; transform: scale(1);
+          ">
+          <!-- Degradado inferior para resaltar texto -->
+          <div style="
+            position: absolute; inset: 0;
+            background: linear-gradient(0deg, rgba(5,5,10,0.95) 0%, rgba(5,5,10,0.4) 50%, transparent 100%);
+          "></div>
+          
+          <!-- Contenido -->
+          <div style="
+            position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 20px;
+            display: flex; justify-content: space-between; align-items: flex-end;
+          ">
+            <!-- Título -->
+            <div style="display: flex; flex-direction: column; max-width: 65%;">
+              <span style="font-family: var(--font-title); font-size: 1.5rem; font-weight: 800; color: ${active ? '#fff' : 'rgba(255,255,255,0.7)'}; text-shadow: 2px 2px 5px rgba(0,0,0,1); letter-spacing: 1px; line-height: 1.1;">
+                ${g.game}
+              </span>
+            </div>
+            <!-- Etiqueta de Hora -->
+            <div style="
+              background: rgba(0, 0, 0, 0.7);
+              border: 1px solid ${active ? 'var(--cyber-red)' : 'rgba(255,255,255,0.2)'};
+              padding: 6px 14px;
+              font-family: var(--font-mono);
+              color: ${active ? 'var(--cyber-red)' : 'rgba(255,255,255,0.8)'};
+              backdrop-filter: blur(8px);
+              clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+              box-shadow: ${active ? '0 0 12px rgba(var(--cyber-red-rgb), 0.4)' : 'none'};
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              line-height: 1;
+            ">
+              <span style="font-size: 1.8rem; font-weight: bold;">${startTimeStr}</span>
+              ${endTimeStr ? `<span style="font-size: 0.9rem; font-weight: bold; opacity: 0.8; margin-top: 3px; letter-spacing: 2px;">${endTimeStr}</span>` : ''}
+            </div>
+          </div>
+          <!-- Borde decorativo superior -->
+          <div style="position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: ${active ? 'var(--cyber-red)' : 'rgba(255,255,255,0.1)'};"></div>
+        `;
+        gamesCol.appendChild(gameCard);
+      });
+
+      dayRow.appendChild(gamesCol);
+      scheduleContainer.appendChild(dayRow);
+    });
+
+    contentArea.appendChild(scheduleContainer);
+
+    const imgElements = scheduleContainer.querySelectorAll('.sch-new-img');
+    imgElements.forEach(img => {
+      const gameName = img.getAttribute('data-game');
+      const isActiveDay = img.getAttribute('data-active') === 'true';
+      getGameImage(gameName).then(url => {
+        if (url) {
+          img.src = url;
+          // Pequeño truco para que haga zoom muy lento continuamente
+          setTimeout(() => {
+            img.style.opacity = isActiveDay ? '1' : '0.15'; // Mayor transparencia en días inactivos
+            img.style.transform = 'scale(1.08)';
+          }, 50);
+        }
+      });
     });
   }
 
@@ -334,6 +477,15 @@ console.log('[ENGINE] Script inicializado');
   }
 
 
+  let menuTimer = null;
+  function scheduleNextMenuRotation() {
+    const activeItem = MENU_ITEMS[currentMenuIndex];
+    // Si la sección actual es Horario, dura el triple de tiempo en pantalla
+    const duration = activeItem.id === 'horario' ? CONFIG.menuInterval * 3 : CONFIG.menuInterval;
+    clearTimeout(menuTimer);
+    menuTimer = setTimeout(rotateMenu, duration);
+  }
+
   function rotateMenu() {
     const activeItem = MENU_ITEMS[currentMenuIndex];
 
@@ -357,9 +509,10 @@ console.log('[ENGINE] Script inicializado');
 
     renderMenu();
     renderActiveContent();
+    scheduleNextMenuRotation();
   }
 
-  setInterval(rotateMenu, CONFIG.menuInterval);
+  scheduleNextMenuRotation();
 
   // ─── FIRESTORE LOGIC ───────────────────
   const PHRASES = {
@@ -583,10 +736,99 @@ console.log('[ENGINE] Script inicializado');
     }
   }
 
+  // ─── COUNTDOWN SYSTEM ───────────────────
+  const countdownEl = document.getElementById('countdownTimer');
+
+  function getNextScheduledTime() {
+    const today = new Date();
+    const dayIdx = today.getDay() === 0 ? 7 : today.getDay();
+    const dayKeys = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+    const todayKey = dayKeys[dayIdx - 1];
+    
+    if (!todayKey || !SCHEDULE[todayKey]) return null;
+
+    const gamesToday = SCHEDULE[todayKey];
+    for (let g of gamesToday) {
+      const timeParts = g.time.split('-');
+      const startTimeStr = timeParts[0] ? timeParts[0].trim() : '';
+      const endTimeStr = timeParts[1] ? timeParts[1].trim() : '';
+      if (!startTimeStr) continue;
+      
+      const [sH, sM] = startTimeStr.split(':').map(Number);
+      if (isNaN(sH) || isNaN(sM)) continue;
+
+      const startD = new Date(today);
+      startD.setHours(sH, sM, 0, 0);
+
+      let endD = null;
+      if (endTimeStr) {
+        const [eH, eM] = endTimeStr.split(':').map(Number);
+        if (!isNaN(eH) && !isNaN(eM)) {
+          endD = new Date(today);
+          endD.setHours(eH, eM, 0, 0);
+          if (endD < startD) {
+            // El stream cruza la medianoche (ej. 22:00 - 01:00)
+            endD.setDate(endD.getDate() + 1);
+          }
+        }
+      }
+
+      if (today < startD) {
+        // Aún no empieza este bloque, contamos hacia él
+        return startD.getTime();
+      } else if (endD && today >= startD && today < endD) {
+        // Estamos DENTRO del horario de este juego, ya debería haber empezado
+        return null;
+      }
+    }
+    return null; // Todos los juegos de hoy han terminado
+  }
+
+  function updateCountdown() {
+    if (!countdownEl) return;
+    const targetTime = getNextScheduledTime();
+    
+    if (!targetTime) {
+      countdownEl.textContent = '00:00';
+      countdownEl.classList.add('glitch');
+      const label = document.querySelector('.countdown-label');
+      if (label) label.textContent = 'ENLACE NEURAL ESTABLECIDO';
+      return;
+    }
+
+    const now = Date.now();
+    const diff = targetTime - now;
+
+    if (diff <= 0) {
+      countdownEl.textContent = '00:00';
+      countdownEl.classList.add('glitch');
+      const label = document.querySelector('.countdown-label');
+      if (label) label.textContent = 'ENLACE NEURAL ESTABLECIDO';
+      return;
+    }
+
+    const totalSeconds = Math.floor(diff / 1000);
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    
+    // Si falta más de una hora, mostramos horas también
+    if (h > 0) {
+      countdownEl.textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    } else {
+      countdownEl.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+    
+    // Actualizar cada segundo
+    setTimeout(updateCountdown, 1000);
+  }
+
   // Init
   loadUsers();
   renderMenu();
   renderActiveContent();
+  scheduleNextMenuRotation();
+  updateCountdown();
 
 })();
 

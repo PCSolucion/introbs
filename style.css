@@ -507,3 +507,58 @@ html, body {
 }
 
 
+/* ═══════════════════
+   COUNTDOWN WIDGET
+   ═══════════════════ */
+.cyber-countdown-container {
+  position: absolute;
+  top: 50px;
+  left: 60px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: rgba(0, 0, 0, 0.3); /* Un poco más de fondo */
+  border: 1px solid rgba(var(--cyber-red-rgb), 0.15); /* Borde un poco más visible */
+  border-left: 2px solid rgba(var(--cyber-red-rgb), 0.6); 
+  padding: 10px 20px;
+  backdrop-filter: blur(4px); 
+  /* Esquina recortada abajo a la derecha para encajar a la izquierda */
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+  box-shadow: none; 
+  opacity: 0.85; /* Menos transparente */
+  transition: opacity 0.4s ease;
+}
+
+.countdown-label {
+  font-family: var(--font-title);
+  font-size: 0.95rem; /* Etiqueta más pequeña */
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: -5px;
+}
+
+.countdown-time {
+  font-family: var(--font-mono);
+  font-size: 4rem; /* Tamaño de reloj reducido (antes 5.5rem) */
+  font-weight: bold;
+  color: rgba(255,255,255,0.85); /* Blanco ligeramente apagado */
+  text-shadow: 0 0 10px rgba(var(--cyber-red-rgb), 0.4), 2px 2px 0 rgba(var(--cyber-red-rgb), 0.2); /* Sombra más suave */
+  letter-spacing: 3px;
+  line-height: 1.1;
+  transition: color 0.3s ease;
+}
+
+.countdown-time.glitch {
+  animation: textGlitch 0.15s infinite;
+  color: var(--cyber-red);
+}
+
+@keyframes textGlitch {
+  0% { transform: translate(0); text-shadow: 0 0 15px rgba(var(--cyber-red-rgb), 0.8), 3px 3px 0 rgba(var(--cyber-red-rgb), 0.5); }
+  25% { transform: translate(-3px, 2px); text-shadow: -3px 0 var(--cyber-red), 3px 2px var(--cyber-cyan); }
+  50% { transform: translate(3px, -1px); text-shadow: 3px 0 var(--cyber-red), -3px -2px var(--cyber-cyan); }
+  75% { transform: translate(-2px, 3px); text-shadow: -3px 0 var(--cyber-red), 3px 2px var(--cyber-cyan); }
+  100% { transform: translate(0); text-shadow: 0 0 15px rgba(var(--cyber-red-rgb), 0.8), 3px 3px 0 rgba(var(--cyber-red-rgb), 0.5); }
+}
