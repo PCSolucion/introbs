@@ -16,7 +16,7 @@
   --cyber-magenta: #d900ff;
 
   --bg-dark: #0a0a0f;
-  --bg-panel: rgba(10, 10, 18, 0.50);
+  --bg-panel: rgba(10, 10, 18, 0.70);
 
   --text-bright: #ffffff;
   --text-dim: rgba(255, 255, 255, 0.6);
@@ -121,7 +121,7 @@ html, body {
 /* Panel Izquierdo (Horario) - Diagonal Tekken y Rojo uniforme */
 .hud-panel:first-child {
   flex: 0 0 600px;
-  background: rgba(var(--cyber-red-rgb), 0.15);
+  background: rgba(var(--cyber-red-rgb), 0.55); /* Transparencia intermedia */
   clip-path: polygon(0 0, 100% 0, 70% 100%, 0 100%);
   z-index: 2;
 }
@@ -170,7 +170,7 @@ html, body {
   align-items: center;
   gap: 14px;
   padding: 10px 18px;
-  background: rgba(255,255,255,0.008);
+  background: rgba(255,255,255,0.02);
   border: 1px solid transparent;
   flex-shrink: 0;
   position: relative;
@@ -277,8 +277,8 @@ html, body {
   color: rgba(255,255,255,0.55);
 }
 .card-item.active .card-title {
-  color: var(--cyber-red);
-  text-shadow: 0 0 10px rgba(var(--cyber-red-rgb), 0.4);
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255,255,255, 0.4);
 }
 
 .card-sub {
@@ -287,7 +287,7 @@ html, body {
   letter-spacing: 1px;
 }
 .card-item.active .card-sub {
-  color: rgba(var(--cyber-red-rgb), 0.6);
+  color: rgba(255,255,255, 0.8);
 }
 
 
@@ -300,8 +300,8 @@ html, body {
   letter-spacing: 2px;
 }
 .card-item.active .card-value {
-  color: var(--cyber-red);
-  text-shadow: var(--glow-red);
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255,255,255, 0.5);
 }
 
 /* Badge */
@@ -376,24 +376,30 @@ html, body {
 /* ═══════════════════
    TACTICAL SCHEDULE (REFINED)
    ═══════════════════ */
+/* -------------------------------------------------------------------
+   Redesigned Schedule Row – premium glass‑morphism style
+   ------------------------------------------------------- */
 .schedule-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  background: rgba(var(--cyber-red-rgb), 0.12); /* Muy transparente para ver el vídeo */
-  border-left: 2px solid rgba(var(--cyber-red-rgb), 0.2);
-  backdrop-filter: blur(1px); /* Desenfoque mínimo */
-  margin-bottom: 10px;
-  padding: 22px 30px;
-  padding-left: 25px; /* El parent #contentArea ya tiene el offset de la diagonal */
+  gap: 12px;
+  background: rgba(var(--cyber-red-rgb), 0.35);
+  backdrop-filter: blur(6px);
+  border-radius: 8px;
+  border-left: 4px solid rgba(var(--cyber-red-rgb), 0.6);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  margin-bottom: 16px;
+  padding: 16px 20px;
   position: relative;
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
+/* Active row – accent bar with neon glow */
 .schedule-row.active {
-  background: rgba(var(--cyber-red-rgb), 0.22); /* Sutilmente más visible que el resto */
+  background: rgba(var(--cyber-red-rgb), 0.45);
   border-left: 4px solid var(--cyber-red);
-  box-shadow: none;
+  box-shadow: 0 0 12px var(--cyber-red);
 }
 
 .sch-day-box {
@@ -403,21 +409,23 @@ html, body {
   flex-direction: column;
 }
 
-.sch-day-short {
-  font-family: var(--font-cyber);
-  font-size: 2rem;
-  color: rgba(255,255,255,0.65);
-  letter-spacing: 3px;
-}
+  .sch-day-short {
+    font-family: var(--font-title);
+    font-size: 2.2rem;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 2px;
+    text-shadow: 0 0 6px rgba(var(--cyber-red-rgb), 0.4);
+  }
 
 .schedule-row.active .sch-day-short {
   color: var(--cyber-red);
   filter: drop-shadow(0 0 5px var(--cyber-red));
 }
 
-.sch-main-info {
-  flex-grow: 1;
-}
+  .sch-main-info {
+    flex-grow: 1;
+    min-width: 0; /* allow text truncation */
+  }
 
 .sch-header {
   display: flex;
@@ -426,28 +434,32 @@ html, body {
   margin-bottom: 6px;
 }
 
-.sch-time {
-  font-family: var(--font-mono);
-  font-size: 1.6rem;
-  color: #fff;
-}
+  .sch-time {
+    font-family: var(--font-mono);
+    font-size: 1.7rem;
+    color: rgba(255,255,255,0.95);
+    text-shadow: 0 0 4px rgba(var(--cyber-red-rgb), 0.3);
+  }
 
-.sch-badge {
-  font-size: 1.05rem; /* Reducido ligeramente de 1.1rem */
-  padding: 3px 15px;
-  border: 1px solid rgba(var(--cyber-red-rgb), 0.5);
-  color: rgba(255,255,255,0.7);
-  font-family: var(--font-mono);
-  letter-spacing: 1px;
-  background: rgba(var(--cyber-red-rgb), 0.05);
-}
+  .sch-badge {
+    font-size: 1.1rem;
+    padding: 4px 16px;
+    border: 1px solid rgba(var(--cyber-red-rgb), 0.4);
+    background: rgba(var(--cyber-red-rgb), 0.12);
+    color: #fff;
+    font-family: var(--font-mono);
+    letter-spacing: 0.8px;
+    border-radius: 4px;
+    box-shadow: 0 0 6px rgba(var(--cyber-red-rgb), 0.25);
+  }
 
-.schedule-row.active .sch-badge {
-  background: var(--cyber-red);
-  border-color: var(--cyber-red);
-  color: #000;
-  font-weight: bold;
-}
+  .schedule-row.active .sch-badge {
+    background: var(--cyber-red);
+    border-color: var(--cyber-red);
+    color: #000;
+    font-weight: bold;
+    box-shadow: 0 0 8px var(--cyber-red);
+  }
 
 .sch-game {
   display: block;
@@ -561,4 +573,14 @@ html, body {
   50% { transform: translate(3px, -1px); text-shadow: 3px 0 var(--cyber-red), -3px -2px var(--cyber-cyan); }
   75% { transform: translate(-2px, 3px); text-shadow: -3px 0 var(--cyber-red), 3px 2px var(--cyber-cyan); }
   100% { transform: translate(0); text-shadow: 0 0 15px rgba(var(--cyber-red-rgb), 0.8), 3px 3px 0 rgba(var(--cyber-red-rgb), 0.5); }
+}
+@keyframes vibrate {
+  0% { transform: translate(0); }
+  25% { transform: translate(-2px, 2px); }
+  50% { transform: translate(2px, -2px); }
+  75% { transform: translate(-2px, -2px); }
+  100% { transform: translate(0); }
+}
+.vibrate {
+  animation: vibrate 0.3s linear infinite;
 }

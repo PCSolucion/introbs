@@ -33,8 +33,7 @@ console.log('[ENGINE] Script inicializado');
       'fondos/isabela.mp4', 'fondos/bloodborne.mp4', 'fondos/ciri.mp4', 'fondos/claire.mp4',
       'fondos/geral.mp4', 'fondos/grace.mp4', 'fondos/gustave.mp4', 'fondos/jill.mp4',
       'fondos/karlach.mp4', 'fondos/laezel.mp4', 'fondos/leon.mp4', 'fondos/lune.mp4',
-      'fondos/maelle.mp4', 'fondos/senua.mp4', 'fondos/shadow.mp4', 'fondos/triss.mp4', 
-      'fondos/yenn.mp4', 'fondos/kratos.mp4'
+      'fondos/maelle.mp4', 'fondos/senua.mp4', 'fondos/shadow.mp4', 'fondos/triss.mp4', 'fondos/yenn.mp4', 'fondos/kratos.mp4', 'fondos/mrx.mp4', 'fondos/panam.mp4', 'fondos/jynx.mp4', 'fondos/claire2.mp4', 'fondos/sciel.mp4', 'fondos/samu.mp4'
     ].sort(() => Math.random() - 0.5),
     bgInterval: 15000,
     menuInterval: 20000, 
@@ -60,11 +59,11 @@ console.log('[ENGINE] Script inicializado');
 
   // Estructura fácil de modificar: un arreglo de juegos por cada día
   const SCHEDULE = {
-    lunes:    [ { game: 'Once Human', time: '17:00 - 21:00' }, { game: 'Metro 2033', time: '22:00 - 01:00' } ],
-    martes:   [ { game: 'Once Human', time: '17:00 - 21:00' }, { game: 'Metro 2033', time: '22:00 - 01:00' } ],
-    miercoles:[ { game: 'Once Human', time: '17:00 - 21:00' }, { game: 'Metro 2033', time: '22:00 - 01:00' } ],
-    jueves:   [ { game: 'Once Human', time: '17:00 - 21:00' }, { game: 'Metro 2033', time: '22:00 - 01:00' } ],
-    viernes:  [ { game: 'Once Human', time: '17:00 - 21:00' }, { game: 'Metro 2033', time: '22:00 - 01:00' } ],
+    lunes:    [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'The Witcher 2', time: '22:00 - 01:00' } ],
+    martes:   [ { game: 'Once Human', time: '17:00 - 21:00' }, { game: 'The Witcher 2', time: '22:00 - 01:00' } ],
+    miercoles:[ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'The Witcher 2', time: '22:00 - 01:00' } ],
+    jueves:   [ { game: 'Once Human', time: '17:00 - 21:00' }, { game: 'The Witcher 2', time: '22:00 - 01:00' } ],
+    viernes:  [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'The Witcher 2', time: '22:00 - 01:00' } ],
   };
   const DAY_NAMES = {
     lunes: 'LUNES', martes: 'MARTES', miercoles: 'MIÉRCOLES',
@@ -302,9 +301,9 @@ console.log('[ENGINE] Script inicializado');
     scheduleContainer.style.flexDirection = 'column';
     scheduleContainer.style.padding = '0 20px 20px 0';
     
-    // TRUCO: Bajamos bastante el contenedor usando menos margen negativo
-    scheduleContainer.style.marginTop = '-120px'; // Bajado de -230px a -120px
-    scheduleContainer.style.height = 'calc(100vh - 250px)'; // Reducimos el alto máximo para que no se salga por abajo
+    // TRUCO: Subimos el contenedor para aprovechar todo el alto de la pantalla
+    scheduleContainer.style.marginTop = '-260px'; // Subido mucho mas para ganar espacio
+    scheduleContainer.style.height = 'calc(100vh - 80px)'; // Aumentamos el alto disponible
     scheduleContainer.style.justifyContent = 'space-between'; // Distribuir filas uniformemente
 
     Object.entries(SCHEDULE).forEach(([k, gamesList], i) => {
@@ -320,16 +319,22 @@ console.log('[ENGINE] Script inicializado');
       dayRow.style.alignItems = 'center';
       dayRow.style.gap = '30px'; // Separación horizontal entre etiqueta y cartas
       dayRow.style.flex = '1'; // Hace que cada día ocupe una fracción del alto total
-      dayRow.style.paddingBottom = '25px'; // Separación vertical entre días
+      dayRow.style.paddingBottom = '10px'; // Reducimos la separación vertical para que quepan todos los días
 
       // Etiqueta del día (Izquierda)
       const dayLabel = document.createElement('div');
       dayLabel.style.width = '125px'; // Reducido de 140px
       dayLabel.style.textAlign = 'right';
       dayLabel.style.flexShrink = '0';
+
+      // Ajustar dinámicamente el tamaño de fuente. Miércoles es más largo y necesita letra más pequeña.
+      const isMiercoles = k === 'miercoles';
+      const titleFontSize = isMiercoles ? (active ? '1.4rem' : '1.2rem') : (active ? '1.8rem' : '1.5rem');
+      const dateFontSize = isMiercoles ? (active ? '1.1rem' : '1rem') : (active ? '1.5rem' : '1.2rem');
+
       dayLabel.innerHTML = `
-        <div style="font-family: var(--font-title); font-size: ${active ? '1.8rem' : '1.3rem'}; font-weight: 800; color: ${active ? 'var(--cyber-red)' : 'rgba(255,255,255,0.3)'}; letter-spacing: 1px; transition: all 0.3s ease; text-transform: uppercase; text-shadow: ${active ? '0 0 15px rgba(var(--cyber-red-rgb), 0.5)' : 'none'};">
-          ${DAY_NAMES[k]} <span style="font-family: var(--font-mono); font-size: ${active ? '1.5rem' : '1rem'}; color: ${active ? '#fff' : 'rgba(255,255,255,0.2)'};">${displayDate}</span>
+        <div style="font-family: var(--font-title); font-size: ${titleFontSize}; font-weight: 800; color: #fff; letter-spacing: 1px; transition: all 0.3s ease; text-transform: uppercase; text-shadow: ${active ? '0 0 15px rgba(255,255,255, 0.5)' : 'none'};">
+          ${DAY_NAMES[k]} <span style="font-family: var(--font-mono); font-size: ${dateFontSize}; color: ${active ? '#fff' : 'rgba(255,255,255,0.8)'};">${displayDate}</span>
         </div>
         ${active ? '<div style="font-family: var(--font-mono); font-size: 0.9rem; background: var(--cyber-red); color: #fff; padding: 2px 10px; display: inline-block; margin-top: 4px; font-weight: bold; letter-spacing: 1px; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);">HOY</div>' : ''}
       `;
@@ -345,7 +350,7 @@ console.log('[ENGINE] Script inicializado');
         const gameCard = document.createElement('div');
         gameCard.style.flex = '1';
         gameCard.style.height = '100%'; // Ocupa toda la altura disponible de su fila
-        gameCard.style.minHeight = '140px'; // Evita que se aplaste mucho
+        gameCard.style.minHeight = '180px'; // Un poco menos de 200px para asegurar que quepan 5 días en 1080p
         gameCard.style.position = 'relative';
         gameCard.style.background = 'transparent'; // Quitamos el fondo negro
         gameCard.style.boxShadow = active ? '0 0 25px rgba(var(--cyber-red-rgb), 0.2)' : 'none'; // Sin sombra oscura artificial en los inactivos
@@ -374,17 +379,17 @@ console.log('[ENGINE] Script inicializado');
           ">
             <!-- Título -->
             <div style="display: flex; flex-direction: column; max-width: 65%;">
-              <span style="font-family: var(--font-title); font-size: 1.5rem; font-weight: 800; color: ${active ? '#fff' : 'rgba(255,255,255,0.7)'}; text-shadow: 2px 2px 5px rgba(0,0,0,1); letter-spacing: 1px; line-height: 1.1;">
+              <span style="font-family: var(--font-title); font-size: 1.5rem; font-weight: 800; color: #fff; text-shadow: 2px 2px 5px rgba(0,0,0,1); letter-spacing: 1px; line-height: 1.1;">
                 ${g.game}
               </span>
             </div>
             <!-- Etiqueta de Hora -->
             <div style="
               background: rgba(0, 0, 0, 0.7);
-              border: 1px solid ${active ? 'var(--cyber-red)' : 'rgba(255,255,255,0.2)'};
+              border: 1px solid ${active ? 'var(--cyber-red)' : 'rgba(255,255,255,0.4)'};
               padding: 6px 14px;
               font-family: var(--font-mono);
-              color: ${active ? 'var(--cyber-red)' : 'rgba(255,255,255,0.8)'};
+              color: ${active ? 'var(--cyber-red)' : '#fff'};
               backdrop-filter: blur(8px);
               clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
               box-shadow: ${active ? '0 0 12px rgba(var(--cyber-red-rgb), 0.4)' : 'none'};
@@ -419,7 +424,7 @@ console.log('[ENGINE] Script inicializado');
           img.src = url;
           // Pequeño truco para que haga zoom muy lento continuamente
           setTimeout(() => {
-            img.style.opacity = isActiveDay ? '1' : '0.15'; // Mayor transparencia en días inactivos
+            img.style.opacity = '1'; // Todas las imágenes totalmente visibles
             img.style.transform = 'scale(1.08)';
           }, 50);
         }
@@ -786,8 +791,25 @@ console.log('[ENGINE] Script inicializado');
 
   function updateCountdown() {
     if (!countdownEl) return;
+    const nowDate = new Date();
+    const dayIdx = nowDate.getDay();
+    // Hide on weekends (Saturday=6, Sunday=0)
+    if (dayIdx === 0 || dayIdx === 6) {
+      countdownEl.style.display = 'none';
+      const label = document.querySelector('.countdown-label');
+      if (label) label.style.display = 'none';
+      // Remove any previous vibration effects
+      document.querySelectorAll('.schedule-row .sch-day-short.vibrate').forEach(el => el.classList.remove('vibrate'));
+      return;
+    } else {
+      countdownEl.style.display = '';
+      const label = document.querySelector('.countdown-label');
+      if (label) label.style.display = '';
+    }
     const targetTime = getNextScheduledTime();
-    
+    // Clean up any previous vibration effects
+    document.querySelectorAll('.schedule-row .sch-day-short.vibrate').forEach(el => el.classList.remove('vibrate'));
+
     if (!targetTime) {
       countdownEl.textContent = '00:00';
       countdownEl.classList.add('glitch');
@@ -804,6 +826,12 @@ console.log('[ENGINE] Script inicializado');
       countdownEl.classList.add('glitch');
       const label = document.querySelector('.countdown-label');
       if (label) label.textContent = 'ENLACE NEURAL ESTABLECIDO';
+      // Trigger vibration on non-active day numbers
+      document.querySelectorAll('.schedule-row .sch-day-short').forEach(el => {
+        if (!el.closest('.schedule-row').classList.contains('active')) {
+          el.classList.add('vibrate');
+        }
+      });
       return;
     }
 
