@@ -1,20 +1,19 @@
 /* ═══════════════════════════════════════════════════════
-   CYBERPUNK 2077 STREAM INTRO — ENGINE + FIRESTORE
-   Conecta en tiempo real con Firestore para mostrar
-   datos de la comunidad (niveles, XP, rachas, logros)
+   CYBERPUNK 2077 STREAM OUTRO — ENGINE + FIRESTORE
+   Muestra el siguiente directo programado en la sección de horarios,
+   manteniendo el resto del HUD idéntico al index original.
    ═══════════════════════════════════════════════════════ */
 
 import { db } from './firebase.js';
 import { collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js';
 import { RAWG_API_KEY } from './api-keys.js';
 
-console.log('[ENGINE] Script inicializado');
+console.log('[OUTRO ENGINE] Script inicializado');
 
 (function () {
   'use strict';
-  console.log('[ENGINE] IIFE en ejecución');
+  console.log('[OUTRO ENGINE] IIFE en ejecución');
 
-  // ─── TITLES (matching LevelCalculator) ──
   const LEVEL_TITLES = {
     1: 'CIVILIAN', 5: 'ROOKIE', 10: 'MERCENARY',
     15: 'SOLO', 20: 'NETRUNNER', 30: 'FIXER',
@@ -37,7 +36,7 @@ console.log('[ENGINE] Script inicializado');
     ].sort(() => Math.random() - 0.5),
     bgInterval: 15000,
     menuInterval: 20000, 
-    countdownMinutes: 5, // Duración de la cuenta atrás
+    countdownMinutes: 5,
   };
 
   const gameImageCache = {};
@@ -57,17 +56,12 @@ console.log('[ENGINE] Script inicializado');
     return '';
   }
 
-  // Estructura fácil de modificar: un arreglo de juegos por cada día
   const SCHEDULE = {
-    lunes:    [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00 - 01:00' } ],
-    martes:   [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00 - 01:00' } ],
-    miercoles:[ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00 - 01:00' } ],
-    jueves:   [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00 - 01:00' } ],
-    viernes:  [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00 - 01:00' } ],
-  };
-  const DAY_NAMES = {
-    lunes: 'LUNES', martes: 'MARTES', miercoles: 'MIÉRCOLES',
-    jueves: 'JUEVES', viernes: 'VIERNES',
+    lunes:    [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'The Witcher 2', time: '22:00 - 01:00' } ],
+    martes:   [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'The Witcher 2', time: '22:00 - 01:00' } ],
+    miercoles:[ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'The Witcher 2', time: '22:00 - 01:00' } ],
+    jueves:   [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'The Witcher 2', time: '22:00 - 01:00' } ],
+    viernes:  [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'The Witcher 2', time: '22:00 - 01:00' } ],
   };
 
   const MENU_ITEMS = [
@@ -144,12 +138,15 @@ console.log('[ENGINE] Script inicializado');
           <span class="card-sub">${item.sub}</span>
         </div>
       `;
-
       menuList.appendChild(el);
     });
   }
 
   function renderActiveContent() {
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
     contentArea.innerHTML = '';
     const activeItem = MENU_ITEMS[currentMenuIndex];
 
@@ -158,9 +155,6 @@ console.log('[ENGINE] Script inicializado');
       case 'topcanal': renderFeed(); break;
       case 'item1':    renderRecentStreams(); break;
       case 'item2':    
-        // Al entrar en la sección, reiniciamos el índice para que empiece desde el principio
-        // Nota: Si quieres que rote MIENTRAS está la sección fija, no lo reinicies aquí. 
-        // Pero como el menú rota, al volver siempre empezará de cero.
         veteransIndex = 0; 
         renderVeterans(); 
         break;
@@ -168,16 +162,12 @@ console.log('[ENGINE] Script inicializado');
     }
   }
 
-  // Helper para formatear nombres (limpieza de guiones bajos específicos y mayúsculas)
   function formatDisplayName(u) {
     let name = (u.displayName || u._id || 'UNKNOWN').toUpperCase();
     if (name === 'C_H_A_N_D_A_L_F') return 'CHANDALF';
     return name;
   }
 
-
-
-  // Helper para extraer los meses de suscripción probando múltiples nombres de campo
   function getSubMonths(u) {
     return u.subMonths || u.months || u.sub_months || u.monthsSubscribed
       || u.tenure || u.subCount || u.subscriptionMonths || u.totalMonths
@@ -189,13 +179,10 @@ console.log('[ENGINE] Script inicializado');
       renderPlaceholder('CARGANDO DATOS...');
       return;
     }
-    // Todos los que tengan al menos 1 mes (sin liiukiin)
     const filtered = allUsers.filter(u => {
       const name = (u.displayName || u._id || '').toLowerCase();
       return name !== 'liiukiin' && getSubMonths(u) > 0;
     });
-    
-    // Ordenar por meses
     const sorted = [...filtered].sort((a, b) => getSubMonths(b) - getSubMonths(a));
 
     if (sorted.length === 0) {
@@ -241,12 +228,10 @@ console.log('[ENGINE] Script inicializado');
       row.className = `schedule-row feed-enter ${i === 0 ? 'active' : ''}`;
       row.style.animationDelay = `${i * 0.1}s`;
       
-      // Intentamos obtener la fecha de varios posibles campos
       let dateObj = null;
       const rawDate = s.date || s.timestamp || s.createdAt || s.fecha || s._docId;
       if (rawDate?.toDate) dateObj = rawDate.toDate();
       else if (rawDate) {
-        // Si el formato es por ejemplo "2024-03-05", Date lo entenderá
         dateObj = new Date(rawDate);
       }
       
@@ -274,176 +259,290 @@ console.log('[ENGINE] Script inicializado');
     });
   }
 
-  function renderSchedule() {
-    const today = new Date();
-    let todayIdx = today.getDay(); // 0 is Sunday, 1 is Monday...
-    if (todayIdx === 0) todayIdx = 7; // Si es domingo, lo contamos como 7 para la lógica de la semana
+  // ─── NEXT STREAM SEARCH LOGIC ─────────────────────
+  const dayKeys = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
 
-    // Calculamos el lunes de esta semana
-    const mondayDate = new Date(today);
-    mondayDate.setDate(today.getDate() - (todayIdx - 1));
+  function findNextStream() {
+    const now = new Date();
+    const currentDayIndex = now.getDay() === 0 ? 7 : now.getDay();
+    const currentHours = now.getHours();
+    const currentMinutes = now.getMinutes();
+    const currentTimeInMinutes = currentHours * 60 + currentMinutes;
 
-    const dayKeys = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
-    const todayKey = dayKeys[todayIdx - 1] || null;
+    let foundStream = null;
+    let targetDate = null;
+    let targetOffset = 0;
 
-    // Obtenemos los números de día del mes y el nombre del mes para cada día
-    // Si el día de la semana ya ha pasado, mostramos la fecha de la semana siguiente (+7 días)
-    const weekDates = dayKeys.map((key, index) => {
-       const d = new Date(mondayDate);
-       let dayOffset = index;
-       if (index + 1 < todayIdx) {
-         dayOffset += 7;
-       }
-       d.setDate(mondayDate.getDate() + dayOffset);
-       const dayStr = d.getDate().toString().padStart(2, '0');
-       let monthStr = d.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase().replace('.', '');
-       return { day: dayStr, month: monthStr };
-    });
-
-    // Contenedor maestro con un nuevo diseño que ocupa todo el alto
-    const scheduleContainer = document.createElement('div');
-    scheduleContainer.style.display = 'flex';
-    scheduleContainer.style.flexDirection = 'column';
-    scheduleContainer.style.padding = '0 20px 20px 0';
-    
-    // TRUCO: Subimos el contenedor para aprovechar todo el alto de la pantalla
-    scheduleContainer.style.marginTop = '-260px'; // Subido mucho mas para ganar espacio
-    scheduleContainer.style.height = 'calc(100vh - 80px)'; // Aumentamos el alto disponible
-    scheduleContainer.style.justifyContent = 'space-between'; // Distribuir filas uniformemente
-
-    Object.entries(SCHEDULE).forEach(([k, gamesList], i) => {
-      const active = k === todayKey;
-      const dateObj = weekDates[i]; 
-      // Mostramos solo el número si es HOY, y el número + mes si es otro día
-      const displayDate = active ? dateObj.day : `${dateObj.day} ${dateObj.month}`;
+    for (let offset = 0; offset < 7; offset++) {
+      const checkDate = new Date(now);
+      checkDate.setDate(now.getDate() + offset);
       
-      const dayRow = document.createElement('div');
-      dayRow.className = 'feed-enter';
-      dayRow.style.animationDelay = `${i * 0.1}s`;
-      dayRow.style.display = 'flex';
-      dayRow.style.alignItems = 'center';
-      dayRow.style.gap = '30px'; // Separación horizontal entre etiqueta y cartas
-      dayRow.style.flex = '1'; // Hace que cada día ocupe una fracción del alto total
-      dayRow.style.paddingBottom = '10px'; // Reducimos la separación vertical para que quepan todos los días
-
-      // Etiqueta del día (Izquierda)
-      const dayLabel = document.createElement('div');
-      dayLabel.style.width = '125px'; // Reducido de 140px
-      dayLabel.style.textAlign = 'right';
-      dayLabel.style.flexShrink = '0';
-
-      // Ajustar dinámicamente el tamaño de fuente. Miércoles es más largo y necesita letra más pequeña.
-      const isMiercoles = k === 'miercoles';
-      const titleFontSize = isMiercoles ? (active ? '1.4rem' : '1.2rem') : (active ? '1.8rem' : '1.5rem');
-      const dateFontSize = isMiercoles ? (active ? '1.1rem' : '1rem') : (active ? '1.5rem' : '1.2rem');
-
-      dayLabel.innerHTML = `
-        <div style="font-family: var(--font-title); font-size: ${titleFontSize}; font-weight: 800; color: #fff; letter-spacing: 1px; transition: all 0.3s ease; text-transform: uppercase; text-shadow: ${active ? '0 0 15px rgba(255,255,255, 0.5)' : 'none'};">
-          ${DAY_NAMES[k]} <span style="font-family: var(--font-mono); font-size: ${dateFontSize}; color: ${active ? '#fff' : 'rgba(255,255,255,0.8)'};">${displayDate}</span>
-        </div>
-        ${active ? '<div style="font-family: var(--font-mono); font-size: 0.9rem; background: var(--cyber-red); color: #fff; padding: 2px 10px; display: inline-block; margin-top: 4px; font-weight: bold; letter-spacing: 1px; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);">HOY</div>' : ''}
-      `;
-      dayRow.appendChild(dayLabel);
-
-      // Contenedor de juegos (Derecha)
-      const gamesCol = document.createElement('div');
-      gamesCol.style.flex = '1';
-      gamesCol.style.display = 'flex';
-      gamesCol.style.gap = '30px'; // Separación horizontal entre cartas del mismo día
-
-      gamesList.forEach(g => {
-        const gameCard = document.createElement('div');
-        gameCard.style.flex = '1';
-        gameCard.style.height = '100%'; // Ocupa toda la altura disponible de su fila
-        gameCard.style.minHeight = '180px'; // Un poco menos de 200px para asegurar que quepan 5 días en 1080p
-        gameCard.style.position = 'relative';
-        gameCard.style.background = 'transparent'; // Quitamos el fondo negro
-        gameCard.style.boxShadow = active ? '0 0 25px rgba(var(--cyber-red-rgb), 0.2)' : 'none'; // Sin sombra oscura artificial en los inactivos
-        // Esquinas biseladas para toque tech
-        gameCard.style.clipPath = 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)';
-
-        const timeParts = g.time.split('-');
-        const startTimeStr = timeParts[0] ? timeParts[0].trim() : g.time;
-        const endTimeStr = timeParts[1] ? timeParts[1].trim() : '';
-
-        gameCard.innerHTML = `
-          <!-- Imagen con efecto de zoom suave al cargar -->
-          <img class="sch-new-img" data-game="${g.game}" data-active="${active}" src="" style="
-            position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.8s ease, transform 15s linear; transform: scale(1);
-          ">
-          <!-- Degradado inferior para resaltar texto -->
-          <div style="
-            position: absolute; inset: 0;
-            background: linear-gradient(0deg, rgba(5,5,10,0.95) 0%, rgba(5,5,10,0.4) 50%, transparent 100%);
-          "></div>
+      const checkDayIndex = checkDate.getDay() === 0 ? 7 : checkDate.getDay();
+      const dayKey = dayKeys[checkDayIndex - 1];
+      
+      const dayStreams = SCHEDULE[dayKey];
+      if (dayStreams && dayStreams.length > 0) {
+        for (const stream of dayStreams) {
+          const [startStr] = stream.time.split('-');
+          const [startHour, startMin] = startStr.trim().split(':').map(Number);
+          const streamTimeInMinutes = startHour * 60 + startMin;
           
-          <!-- Contenido -->
-          <div style="
-            position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 20px;
-            display: flex; justify-content: space-between; align-items: flex-end;
-          ">
-            <!-- Título -->
-            <div style="display: flex; flex-direction: column; max-width: 65%;">
-              <span style="font-family: var(--font-title); font-size: 1.5rem; font-weight: 800; color: #fff; text-shadow: 2px 2px 5px rgba(0,0,0,1); letter-spacing: 1px; line-height: 1.1;">
-                ${g.game}
-              </span>
-            </div>
-            <!-- Etiqueta de Hora -->
-            <div style="
-              background: rgba(0, 0, 0, 0.7);
-              border: 1px solid ${active ? 'var(--cyber-red)' : 'rgba(255,255,255,0.4)'};
-              padding: 6px 14px;
-              font-family: var(--font-mono);
-              color: ${active ? 'var(--cyber-red)' : '#fff'};
-              backdrop-filter: blur(8px);
-              clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
-              box-shadow: ${active ? '0 0 12px rgba(var(--cyber-red-rgb), 0.4)' : 'none'};
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              line-height: 1;
-            ">
-              <span style="font-size: 1.8rem; font-weight: bold;">${startTimeStr}</span>
-              ${endTimeStr ? `<span style="font-size: 0.9rem; font-weight: bold; opacity: 0.8; margin-top: 3px; letter-spacing: 2px;">${endTimeStr}</span>` : ''}
-            </div>
-          </div>
-          <!-- Borde decorativo superior -->
-          <div style="position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: ${active ? 'var(--cyber-red)' : 'rgba(255,255,255,0.1)'};"></div>
-        `;
-        gamesCol.appendChild(gameCard);
-      });
-
-      dayRow.appendChild(gamesCol);
-      scheduleContainer.appendChild(dayRow);
-    });
-
-    contentArea.appendChild(scheduleContainer);
-
-    const imgElements = scheduleContainer.querySelectorAll('.sch-new-img');
-    imgElements.forEach(img => {
-      const gameName = img.getAttribute('data-game');
-      const isActiveDay = img.getAttribute('data-active') === 'true';
-      getGameImage(gameName).then(url => {
-        if (url) {
-          img.src = url;
-          // Pequeño truco para que haga zoom muy lento continuamente
-          setTimeout(() => {
-            img.style.opacity = '1'; // Todas las imágenes totalmente visibles
-            img.style.transform = 'scale(1.08)';
-          }, 50);
+          if (offset === 0) {
+            if (streamTimeInMinutes > currentTimeInMinutes) {
+              foundStream = stream;
+              targetDate = new Date(checkDate);
+              targetDate.setHours(startHour, startMin, 0, 0);
+              targetOffset = offset;
+              break;
+            }
+          } else {
+            foundStream = stream;
+            targetDate = new Date(checkDate);
+            targetDate.setHours(startHour, startMin, 0, 0);
+            targetOffset = offset;
+            break;
+          }
         }
-      });
-    });
+      }
+      if (foundStream) break;
+    }
+
+    if (!foundStream) {
+      for (let offset = 7; offset < 14; offset++) {
+        const checkDate = new Date(now);
+        checkDate.setDate(now.getDate() + offset);
+        
+        const checkDayIndex = checkDate.getDay() === 0 ? 7 : checkDate.getDay();
+        const dayKey = dayKeys[checkDayIndex - 1];
+        
+        const dayStreams = SCHEDULE[dayKey];
+        if (dayStreams && dayStreams.length > 0) {
+          const stream = dayStreams[0];
+          const [startStr] = stream.time.split('-');
+          const [startHour, startMin] = startStr.trim().split(':').map(Number);
+          
+          foundStream = stream;
+          targetDate = new Date(checkDate);
+          targetDate.setHours(startHour, startMin, 0, 0);
+          targetOffset = offset;
+          break;
+        }
+      }
+    }
+
+    return { stream: foundStream, date: targetDate, offset: targetOffset };
   }
 
+  function formatNextStreamDay(date, offset) {
+    if (offset === 0) return 'HOY';
+    if (offset === 1) return 'MAÑANA';
+    
+    const days = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
+    const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+    
+    return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]}`;
+  }
 
+  // ─── RENDER NEXT STREAM CARD ──────────────────────
+  let countdownInterval = null;
+
+  function renderSchedule() {
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+
+    const { stream, date: targetDate, offset } = findNextStream();
+
+    if (!stream) {
+      renderPlaceholder('SIN PROGRAMACIÓN');
+      return;
+    }
+
+    const formattedDay = formatNextStreamDay(targetDate, offset);
+    const [startStr] = stream.time.split('-');
+
+    const container = document.createElement('div');
+    container.className = 'feed-enter';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '25px';
+    container.style.marginTop = '-260px'; // Alinear perfectamente con el menú
+    container.style.height = 'calc(100vh - 80px)';
+    container.style.justifyContent = 'center';
+    container.style.paddingRight = '20px';
+
+    // Cabecera superior
+    const headerEl = document.createElement('div');
+    headerEl.style.fontFamily = 'var(--font-mono)';
+    headerEl.style.fontSize = '1.3rem';
+    headerEl.style.color = 'var(--cyber-red)';
+    headerEl.style.textShadow = 'var(--glow-red)';
+    headerEl.style.letterSpacing = '3px';
+    headerEl.style.textTransform = 'uppercase';
+    headerEl.textContent = '// ENLACE_NEURAL: SIGUIENTE TRANSMISIÓN';
+    container.appendChild(headerEl);
+
+    // Caja de Juego (Game Display)
+    const gameDisplay = document.createElement('div');
+    gameDisplay.style.position = 'relative';
+    gameDisplay.style.width = '100%';
+    gameDisplay.style.height = '320px';
+    gameDisplay.style.minHeight = '320px';
+    gameDisplay.style.overflow = 'hidden';
+    gameDisplay.style.border = '1px solid rgba(255,255,255,0.08)';
+    gameDisplay.style.clipPath = 'polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px)';
+    gameDisplay.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+
+    const imgFallback = document.createElement('div');
+    imgFallback.style.position = 'absolute';
+    imgFallback.style.inset = '0';
+    imgFallback.style.background = '#0d0d15';
+    imgFallback.style.zIndex = '-1';
+    gameDisplay.appendChild(imgFallback);
+
+    const img = document.createElement('img');
+    img.style.position = 'absolute';
+    img.style.inset = '0';
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    img.style.opacity = '0';
+    img.style.transform = 'scale(1)';
+    img.style.transition = 'opacity 1.5s ease, transform 25s linear';
+    gameDisplay.appendChild(img);
+
+    // Overlay con textos
+    const overlay = document.createElement('div');
+    overlay.style.position = 'absolute';
+    overlay.style.inset = '0';
+    overlay.style.background = 'linear-gradient(0deg, rgba(10,10,15,0.95) 0%, rgba(10,10,15,0.4) 65%, transparent 100%)';
+    overlay.style.display = 'flex';
+    overlay.style.flexDirection = 'column';
+    overlay.style.justifyContent = 'flex-end';
+    overlay.style.padding = '25px';
+
+    overlay.innerHTML = `
+      <h2 style="font-family: var(--font-title); font-size: 2.6rem; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 1px; text-shadow: 2px 2px 6px rgba(0,0,0,0.9); line-height: 1.1; margin-bottom: 12px;">
+        ${stream.game}
+      </h2>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-family: var(--font-ui); font-size: 1.6rem; font-weight: 700; color: #fff; text-shadow: 1px 1px 4px rgba(0,0,0,0.9); text-transform: uppercase; letter-spacing: 1px;">
+          ${formattedDay}
+        </span>
+        <span style="font-family: var(--font-mono); font-size: 2.1rem; font-weight: bold; color: var(--cyber-red); background: rgba(0, 0, 0, 0.75); border: 1px solid var(--cyber-red); padding: 5px 16px; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); box-shadow: var(--glow-red);">
+          ${startStr.trim()}
+        </span>
+      </div>
+    `;
+    gameDisplay.appendChild(overlay);
+    container.appendChild(gameDisplay);
+
+    // Cargar imagen de RAWG API
+    getGameImage(stream.game).then(url => {
+      if (url) {
+        img.src = url;
+        img.style.opacity = '0.55';
+        img.style.transform = 'scale(1.06)';
+      }
+    });
+
+    // Caja de Cuenta Regresiva (Countdown widget)
+    const countdownBox = document.createElement('div');
+    countdownBox.style.display = 'flex';
+    countdownBox.style.flexDirection = 'column';
+    countdownBox.style.alignItems = 'center';
+    countdownBox.style.padding = '20px';
+    countdownBox.style.background = 'rgba(var(--cyber-red-rgb), 0.08)';
+    countdownBox.style.border = '1px solid rgba(var(--cyber-red-rgb), 0.2)';
+    countdownBox.style.borderLeft = '4px solid var(--cyber-red)';
+    countdownBox.style.clipPath = 'polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)';
+    countdownBox.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
+
+    countdownBox.innerHTML = `
+      <span style="font-family: var(--font-mono); font-size: 1rem; color: rgba(255,255,255,0.4); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 5px;">
+        TIEMPO PARA EL ENLACE
+      </span>
+      <div id="countdownClock" style="font-family: var(--font-mono); font-size: 3.2rem; font-weight: bold; color: #fff; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255,255,255, 0.2), 0 0 10px rgba(var(--cyber-red-rgb), 0.3);">
+        00d : 00h : 00m : 00s
+      </div>
+    `;
+    container.appendChild(countdownBox);
+
+    // Texto de despedida inferior
+    const bottomLog = document.createElement('div');
+    bottomLog.style.fontFamily = 'var(--font-mono)';
+    bottomLog.style.fontSize = '1.05rem';
+    bottomLog.style.color = 'rgba(255, 255, 255, 0.4)';
+    bottomLog.style.display = 'flex';
+    bottomLog.style.alignItems = 'center';
+    bottomLog.style.gap = '10px';
+    bottomLog.style.letterSpacing = '1.5px';
+    bottomLog.style.marginTop = '10px';
+
+    const logIndicator = document.createElement('span');
+    logIndicator.style.width = '8px';
+    logIndicator.style.height = '8px';
+    logIndicator.style.backgroundColor = 'var(--cyber-red)';
+    logIndicator.style.boxShadow = 'var(--glow-red)';
+    logIndicator.style.borderRadius = '50%';
+    logIndicator.style.animation = 'logPulse 1.5s infinite ease-in-out';
+    
+    if (!document.getElementById('outroKeyframes')) {
+      const style = document.createElement('style');
+      style.id = 'outroKeyframes';
+      style.textContent = `
+        @keyframes logPulse {
+          0%, 100% { opacity: 0.3; transform: scale(0.9); }
+          50% { opacity: 1; transform: scale(1.1); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    bottomLog.appendChild(logIndicator);
+    const textSpan = document.createElement('span');
+    textSpan.textContent = 'GRACIAS POR ACOMPAÑARME EN EL VIAJE, CHOOMS_';
+    bottomLog.appendChild(textSpan);
+    container.appendChild(bottomLog);
+
+    contentArea.appendChild(container);
+
+    function updateCountdown() {
+      const clock = document.getElementById('countdownClock');
+      if (!clock) return;
+      
+      const now = new Date();
+      const diffMs = targetDate - now;
+      
+      if (diffMs <= 0) {
+        clock.textContent = "00d : 00h : 00m : 00s";
+        return;
+      }
+      
+      const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+      
+      const dStr = days.toString().padStart(2, '0');
+      const hStr = hours.toString().padStart(2, '0');
+      const mStr = minutes.toString().padStart(2, '0');
+      const sStr = seconds.toString().padStart(2, '0');
+      
+      clock.textContent = `${dStr}d : ${hStr}h : ${mStr}m : ${sStr}s`;
+    }
+
+    updateCountdown();
+    countdownInterval = setInterval(updateCountdown, 1000);
+  }
+
+  // ─── FEED RENDERING ────────────────────────────────
   function renderFeed() {
     if (allUsers.length === 0) {
       renderPlaceholder('CARGANDO DATOS...');
       return;
     }
-    // Top 5 por nivel (excluir liiukiin)
     const filtered = allUsers.filter(u => (u.displayName || u._id || '').toLowerCase() !== 'liiukiin');
     const top5 = [...filtered].sort((a, b) => (b.level || 1) - (a.level || 1)).slice(0, 5);
     top5.forEach((u, i) => {
@@ -486,11 +585,10 @@ console.log('[ENGINE] Script inicializado');
     contentArea.appendChild(el);
   }
 
-
+  // ─── ROTATION LOGIC ───────────────────────────────
   let menuTimer = null;
   function scheduleNextMenuRotation() {
     const activeItem = MENU_ITEMS[currentMenuIndex];
-    // Si la sección actual es Horario, dura el triple de tiempo en pantalla
     const duration = activeItem.id === 'horario' ? CONFIG.menuInterval * 3 : CONFIG.menuInterval;
     clearTimeout(menuTimer);
     menuTimer = setTimeout(rotateMenu, duration);
@@ -499,8 +597,6 @@ console.log('[ENGINE] Script inicializado');
   function rotateMenu() {
     const activeItem = MENU_ITEMS[currentMenuIndex];
 
-    // Incrementamos los índices de paginación AL SALIR de la sección,
-    // así la próxima vez que volvamos mostrará el siguiente grupo.
     if (activeItem.id === 'topcanal') {
       feedIndex = (feedIndex + 5) % feedQueue.length;
     }
@@ -514,7 +610,6 @@ console.log('[ENGINE] Script inicializado');
       }
     }
 
-    // Avanzamos al siguiente elemento del menú principal
     currentMenuIndex = (currentMenuIndex + 1) % MENU_ITEMS.length;
 
     renderMenu();
@@ -522,9 +617,7 @@ console.log('[ENGINE] Script inicializado');
     scheduleNextMenuRotation();
   }
 
-  scheduleNextMenuRotation();
-
-  // ─── FIRESTORE LOGIC ───────────────────
+  // ─── FIRESTORE LOAD & CACHE ────────────────────────
   const PHRASES = {
     topXP: ['El mercenario con más XP en Night City', 'Nadie acumula más datos que este choom', 'Leyenda cargada en el sistema'],
     topMessages: ['Feed del chat sobrecalentado por', 'Máxima actividad neural detectada', 'Señal más fuerte en la red'],
@@ -558,8 +651,6 @@ console.log('[ENGINE] Script inicializado');
     return queue;
   }
 
-  // ─── CACHE SYSTEM (localStorage) ──────
-  // Expiración: 1 hora en milisegundos (para mantener datos de subs actualizados)
   const CACHE_TTL = 1 * 60 * 60 * 1000;
   const CACHE_KEY_USERS = 'introbs_cache_users_v4';
   const CACHE_KEY_STREAMS = 'introbs_cache_streams_v4';
@@ -569,7 +660,6 @@ console.log('[ENGINE] Script inicializado');
     const ts = localStorage.getItem(CACHE_KEY_TIMESTAMP);
     if (!ts) return false;
     const age = Date.now() - Number(ts);
-    console.log(`[CACHE] Antigüedad: ${(age / 3600000).toFixed(1)}h — TTL: ${CACHE_TTL / 3600000}h`);
     return age < CACHE_TTL;
   }
 
@@ -578,9 +668,8 @@ console.log('[ENGINE] Script inicializado');
       localStorage.setItem(CACHE_KEY_USERS, JSON.stringify(users));
       localStorage.setItem(CACHE_KEY_STREAMS, JSON.stringify(streams));
       localStorage.setItem(CACHE_KEY_TIMESTAMP, String(Date.now()));
-      console.log(`[CACHE] Datos guardados — ${users.length} usuarios, ${streams.length} streams`);
     } catch (e) {
-      console.warn('[CACHE] Error al guardar en localStorage:', e);
+      console.warn('[CACHE] Error:', e);
     }
   }
 
@@ -588,10 +677,8 @@ console.log('[ENGINE] Script inicializado');
     try {
       const users = JSON.parse(localStorage.getItem(CACHE_KEY_USERS) || '[]');
       const streams = JSON.parse(localStorage.getItem(CACHE_KEY_STREAMS) || '[]');
-      console.log(`[CACHE] Datos recuperados — ${users.length} usuarios, ${streams.length} streams`);
       return { users, streams };
     } catch (e) {
-      console.warn('[CACHE] Error al leer caché:', e);
       return { users: [], streams: [] };
     }
   }
@@ -605,29 +692,17 @@ console.log('[ENGINE] Script inicializado');
       streams = Object.keys(possibleHistory).map(key => ({ _docId: key, ...possibleHistory[key] }));
     }
 
-    // Log de depuración: muestra las claves del primer stream para detectar el nombre del campo
-    if (streams.length > 0) {
-      console.log('[ENGINE] Campos disponibles en el primer stream:', Object.keys(streams[0]));
-      console.log('[ENGINE] Primer stream completo:', JSON.stringify(streams[0]));
-    }
-
-    // Detecta si un string parece un título válido (descarta IDs, errores SQL, códigos largos)
     const isTitleValid = (str) => {
       if (!str || typeof str !== 'string') return false;
       const s = str.trim();
       if (s === '') return false;
-      // Rechazar si parece un código SQL (ej: "HY000", "08S01", "SQLSTATE ...", etc.)
       if (/sqlstate/i.test(s)) return false;
-      // Rechazar si parece un UUID o hash largo (solo hex/guiones, >12 chars)
       if (/^[0-9a-f\-]{12,}$/i.test(s)) return false;
-      // Rechazar si contiene mensajes de error típicos de BD
       if (/(error|exception|failed|invalid|undefined|null)/i.test(s) && s.length > 40) return false;
-      // Rechazar strings extremadamente largos que no son títulos
       if (s.length > 150) return false;
       return true;
     };
 
-    // Función auxiliar para extraer el título del stream probando múltiples campos posibles
     const getTitle = (obj) => {
       const candidates = [
         obj.title, obj.name, obj.nombre, obj.titulo, obj.streamTitle,
@@ -653,29 +728,20 @@ console.log('[ENGINE] Script inicializado');
       return 0;
     };
 
-    // Filtrar duplicados por nombre, manteniendo únicamente el de la fecha más antigua (apertura)
     const uniqueMap = new Map();
     streams.forEach(s => {
       const rawTitle = getTitle(s) || 'SIN TÍTULO';
-      
-      // Filtrar directos que contengan "test" (insensible a mayúsculas)
       if (rawTitle.toLowerCase().includes('test')) return;
-
       const normalizedName = rawTitle.toUpperCase().trim().replace(/\s+/g, ' ');
       const t = getT(s);
-      
-      // Si no existe el nombre o si encontramos una fecha más antigua, actualizamos el mapa
       if (!uniqueMap.has(normalizedName) || (t > 0 && t < uniqueMap.get(normalizedName)._t)) {
         uniqueMap.set(normalizedName, { ...s, _docId: s._docId, _t: t, _resolvedTitle: rawTitle });
       }
     });
 
-    const result = Array.from(uniqueMap.values())
+    return Array.from(uniqueMap.values())
       .sort((a, b) => b._t - a._t)
       .slice(0, 5);
-
-    console.log('[ENGINE] Streams procesados (sin duplicados, fecha apertura):', result.length);
-    return result;
   }
 
   function applyData(users, streams) {
@@ -686,59 +752,35 @@ console.log('[ENGINE] Script inicializado');
   }
 
   async function fetchFromFirestore() {
-    console.log('[FIREBASE] Descargando datos frescos de Firestore...');
     const userSnapshot = await getDocs(collection(db, 'users'));
     const users = [];
     userSnapshot.forEach(d => { const data = d.data(); data._id = d.id; users.push(data); });
-    console.log(`[FIREBASE] ${users.length} usuarios descargados`);
-    // Log de depuración: muestra campos del primer usuario con meses de sub
-    const firstSub = users.find(u => {
-      const keys = Object.keys(u);
-      return keys.some(k => /month|sub|tenure/i.test(k));
-    });
-    if (firstSub) {
-      console.log('[SUB DEBUG] Campos del primer usuario con sub:', Object.keys(firstSub));
-      console.log('[SUB DEBUG] Datos completos:', JSON.stringify(firstSub));
-    } else {
-      console.warn('[SUB DEBUG] Ningún usuario tiene campos de tipo mes/sub/tenure');
-    }
 
     const docRef = doc(db, 'system', 'stream_history');
     const docSnap = await getDoc(docRef);
     let streams = [];
     if (docSnap.exists()) {
       streams = processStreamsData(docSnap.data());
-    } else {
-      console.warn('[FIREBASE] stream_history no existe');
     }
-    console.log(`[FIREBASE] ${streams.length} streams descargados`);
     return { users, streams };
   }
 
   async function loadUsers() {
     try {
-      // 1. Si la caché es válida, usar datos locales
       if (isCacheValid()) {
-        console.log('[CACHE] ✅ Usando datos en caché (no se contacta Firebase)');
         const { users, streams } = loadFromCache();
         if (users.length > 0) {
           applyData(users, streams);
           return;
         }
-        console.log('[CACHE] Caché vacía, forzando descarga...');
       }
-
-      // 2. Si no hay caché o expiró, descargar de Firebase
       const { users, streams } = await fetchFromFirestore();
       saveToCache(users, streams);
       applyData(users, streams);
-
     } catch (err) {
-      console.error('[INTRO] Error de Firestore:', err);
-      // 3. Fallback: intentar caché aunque esté expirada
+      console.error('[OUTRO] Error loading data:', err);
       const { users, streams } = loadFromCache();
       if (users.length > 0) {
-        console.log('[CACHE] ⚠️ Usando caché expirada como fallback');
         applyData(users, streams);
       } else {
         renderPlaceholder('ERROR DE CONEXIÓN');
@@ -746,14 +788,10 @@ console.log('[ENGINE] Script inicializado');
     }
   }
 
-
-
-  // Init
+  // Inicialización
   loadUsers();
   renderMenu();
   renderActiveContent();
   scheduleNextMenuRotation();
 
-
 })();
-

@@ -3,11 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stream Intro</title>
+  <title>Stream Outro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Aumentar la transparencia y reducir el difuminado para que los videos de fondo sean más visibles */
+    .hud-panel {
+      backdrop-filter: blur(3px) !important;
+      -webkit-backdrop-filter: blur(3px) !important;
+    }
+    
+    .hud-panel:first-child {
+      background: rgba(var(--cyber-red-rgb), 0.30) !important; /* Más transparente (antes 0.55) */
+    }
+    
+    .hud-panel:last-child {
+      background: rgba(10, 10, 18, 0.45) !important; /* Más transparente (antes 0.70) */
+    }
+  </style>
 </head>
 <body>
 
@@ -45,7 +60,7 @@
   </div>
 
 
-  <!-- Firebase SDK -->
-  <script type="module" src="script.js?v=1.1"></script>
+  <!-- Firebase SDK and custom Outro Script -->
+  <script type="module" src="outro-script.js?v=1.1"></script>
 </body>
 </html>
