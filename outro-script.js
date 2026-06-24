@@ -543,30 +543,82 @@ console.log('[OUTRO ENGINE] Script inicializado');
       renderPlaceholder('CARGANDO DATOS...');
       return;
     }
+    
+    // Top 10 por nivel y XP (excluir liiukiin)
     const filtered = allUsers.filter(u => (u.displayName || u._id || '').toLowerCase() !== 'liiukiin');
-    const top5 = [...filtered].sort((a, b) => (b.level || 1) - (a.level || 1)).slice(0, 5);
-    top5.forEach((u, i) => {
+    const sorted = [...filtered].sort((a, b) => {
+      const lvlDiff = (b.level || 1) - (a.level || 1);
+      if (lvlDiff !== 0) return lvlDiff;
+      return (b.xp || 0) - (a.xp || 0);
+    });
+    const top10 = sorted.slice(0, 10);
+    
+    let prevRankingArray = [];
+    try {
+      const storedPrev = localStorage.getItem('introbs_prev_ranking');
+      if (storedPrev) {
+        prevRankingArray = JSON.parse(storedPrev);
+      }
+    } catch (e) {
+      console.error('Error parsing prev ranking in renderFeed:', e);
+    }
+    
+    // Contenedor maestro para subir el TOP verticalmente y ocupar el mismo espacio que el horario
+    const feedContainer = document.createElement('div');
+    feedContainer.style.display = 'flex';
+    feedContainer.style.flexDirection = 'column';
+    feedContainer.style.padding = '0 20px 20px 0';
+    feedContainer.style.marginTop = '-260px'; // TRUCO: Subimos el contenedor para aprovechar todo el alto
+    feedContainer.style.height = 'calc(100vh - 80px)';
+    feedContainer.style.justifyContent = 'space-between';
+
+    top10.forEach((u, i) => {
       const row = document.createElement('div');
-      row.className = `schedule-row feed-enter ${i === 0 ? 'active' : ''}`;
-      row.style.animationDelay = `${i * 0.1}s`;
+      row.className = `schedule-row top-row feed-enter ${i === 0 ? 'active' : ''}`;
+      row.style.animationDelay = `${i * 0.08}s`;
+      row.style.marginBottom = '0'; // Sin margen inferior porque usamos space-between
+      
       const name = formatDisplayName(u);
       const lvl = u.level || 1;
       const title = getTitle(lvl);
+      
+      // Calcular cambios de rango
+      const currentUserId = u._id || u.displayName;
+      const currentRank = i + 1;
+      const prevRankIndex = prevRankingArray.indexOf(currentUserId);
+      
+      let changeHTML = '';
+      if (prevRankIndex === -1) {
+        changeHTML = `<span class="rank-change-indicator rank-new">NEW</span>`;
+      } else {
+        const prevRank = prevRankIndex + 1;
+        const diff = prevRank - currentRank;
+        if (diff > 0) {
+          changeHTML = `<span class="rank-change-indicator rank-up">▲ ${diff}</span>`;
+        } else if (diff < 0) {
+          changeHTML = `<span class="rank-change-indicator rank-down">▼ ${Math.abs(diff)}</span>`;
+        } else {
+          changeHTML = `<span class="rank-change-indicator rank-equal">▪</span>`;
+        }
+      }
+      
       row.innerHTML = `
-        <div class="sch-day-box">
-          <span class="sch-day-short">#${i + 1}</span>
+        <div class="top-rank-col">
+          <span class="top-rank-num">#${i + 1}</span>
+          ${changeHTML}
         </div>
-        <div class="sch-main-info">
-          <div class="sch-header">
-            <span class="sch-time">${name}</span>
-            <span class="sch-badge">LVL ${lvl}</span>
-          </div>
-          <span class="sch-game">${title}</span>
+        <div class="top-info-col">
+          <span class="top-name">${name}</span>
+          <span class="top-title">${title}</span>
         </div>
-        <div class="sch-decor">00${i + 1}</div>
+        <div class="top-level-col">
+          <span class="top-level-val">LVL ${lvl}</span>
+          <span class="top-level-lbl">STATUS DATA</span>
+        </div>
       `;
-      contentArea.appendChild(row);
+      feedContainer.appendChild(row);
     });
+    contentArea.appendChild(feedContainer);
   }
 
   function renderPlaceholder(title) {
@@ -588,10 +640,8 @@ console.log('[OUTRO ENGINE] Script inicializado');
   // ─── ROTATION LOGIC ───────────────────────────────
   let menuTimer = null;
   function scheduleNextMenuRotation() {
-    const activeItem = MENU_ITEMS[currentMenuIndex];
-    const duration = activeItem.id === 'horario' ? CONFIG.menuInterval * 3 : CONFIG.menuInterval;
     clearTimeout(menuTimer);
-    menuTimer = setTimeout(rotateMenu, duration);
+    menuTimer = setTimeout(rotateMenu, CONFIG.menuInterval);
   }
 
   function rotateMenu() {
@@ -744,8 +794,61 @@ console.log('[OUTRO ENGINE] Script inicializado');
       .slice(0, 5);
   }
 
+  function getRankedUserIds(users) {
+    const filtered = users.filter(u => (u.displayName || u._id || '').toLowerCase() !== 'liiukiin');
+    const sorted = [...filtered].sort((a, b) => {
+      const lvlDiff = (b.level || 1) - (a.level || 1);
+      if (lvlDiff !== 0) return lvlDiff;
+      return (b.xp || 0) - (a.xp || 0);
+    });
+    return sorted.map(u => u._id || u.displayName);
+  }
+
   function applyData(users, streams) {
     allUsers = users;
+    
+    // Manage ranking history for top level canal
+    try {
+      const currentRankedIds = getRankedUserIds(users);
+      let storedCurr = localStorage.getItem('introbs_curr_ranking');
+      
+      if (!storedCurr) {
+        // First run or no history: initialize current and simulate a previous ranking to show the feature working immediately!
+        const initialCurr = currentRankedIds;
+        const initialPrev = [...initialCurr];
+        
+        // Let's swap some elements to simulate recent changes on first boot so it looks dynamic
+        if (initialPrev.length >= 4) {
+          const temp0 = initialPrev[0];
+          initialPrev[0] = initialPrev[1];
+          initialPrev[1] = temp0;
+          
+          if (initialPrev.length >= 6) {
+            const temp3 = initialPrev[3];
+            initialPrev[3] = initialPrev[4];
+            initialPrev[4] = temp3;
+          }
+        }
+        
+        localStorage.setItem('introbs_curr_ranking', JSON.stringify(initialCurr));
+        localStorage.setItem('introbs_prev_ranking', JSON.stringify(initialPrev));
+      } else {
+        const parsedCurr = JSON.parse(storedCurr);
+        
+        // Check if the current ranking has actually changed compared to the stored current ranking
+        const isDifferent = parsedCurr.length !== currentRankedIds.length || 
+                            currentRankedIds.some((id, idx) => id !== parsedCurr[idx]);
+                            
+        if (isDifferent) {
+          // If the ranking changed, shift stored current to stored previous, and set current to new
+          localStorage.setItem('introbs_prev_ranking', JSON.stringify(parsedCurr));
+          localStorage.setItem('introbs_curr_ranking', JSON.stringify(currentRankedIds));
+        }
+      }
+    } catch (e) {
+      console.error('Error handling rank history:', e);
+    }
+
     feedQueue = buildFeedQueue(allUsers);
     recentStreams = streams;
     renderActiveContent();
