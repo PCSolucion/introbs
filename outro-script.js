@@ -57,11 +57,11 @@ console.log('[OUTRO ENGINE] Script inicializado');
   }
 
   const SCHEDULE = {
-    lunes:    [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'The Witcher 2', time: '22:00 - 01:00' } ],
-    martes:   [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'The Witcher 2', time: '22:00 - 01:00' } ],
-    miercoles:[ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'The Witcher 2', time: '22:00 - 01:00' } ],
-    jueves:   [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'The Witcher 2', time: '22:00 - 01:00' } ],
-    viernes:  [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'The Witcher 2', time: '22:00 - 01:00' } ],
+    lunes:    [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
+    martes:   [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
+    miercoles:[ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
+    jueves:   [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
+    viernes:  [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
   };
 
   const MENU_ITEMS = [

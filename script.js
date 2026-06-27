@@ -59,11 +59,11 @@ console.log('[ENGINE] Script inicializado');
 
   // Estructura fácil de modificar: un arreglo de juegos por cada día
   const SCHEDULE = {
-    lunes:    [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00 - 01:00' } ],
-    martes:   [ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00 - 01:00' } ],
-    miercoles:[ { game: 'Conan Exiles Enhanced', time: '17:00 - 21:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00 - 01:00' } ],
-    jueves:   [ { game: 'Once Human', time: '17:00 - 21:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00 - 01:00' } ],
-    viernes:  [ { game: 'Once Human', time: '17:00 - 21:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00 - 01:00' } ],
+    lunes:    [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
+    martes:   [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
+    miercoles:[ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
+    jueves:   [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
+    viernes:  [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
   };
   const DAY_NAMES = {
     lunes: 'LUNES', martes: 'MARTES', miercoles: 'MIÉRCOLES',
