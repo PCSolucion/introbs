@@ -7,6 +7,7 @@
 import { db } from './firebase.js';
 import { collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js';
 import { RAWG_API_KEY } from './api-keys.js';
+import { SCHEDULE } from './schedule.js';
 
 console.log('[OUTRO ENGINE] Script inicializado');
 
@@ -60,19 +61,10 @@ console.log('[OUTRO ENGINE] Script inicializado');
     return '';
   }
 
-  const SCHEDULE = {
-    lunes:    [ { game: 'Once Human', time: '17:00' }, { game: 'GTA San Andreas', time: '22:00' } ],
-    martes:   [ { game: 'Once Human', time: '17:00' }, { game: 'GTA San Andreas', time: '22:00' } ],
-    miercoles:[ { game: 'Once Human', time: '17:00' }, { game: 'GTA San Andreas', time: '22:00' } ],
-    jueves:   [ { game: 'Once Human', time: '17:00' }, { game: 'GTA San Andreas', time: '22:00' } ],
-    viernes:  [ { game: 'Once Human', time: '17:00' }, { game: 'GTA San Andreas', time: '22:00' } ],
-  };
-
   const MENU_ITEMS = [
     { id: 'horario',   title: 'HORARIOS',   sub: 'Stream Schedule' },
     { id: 'topcanal',  title: 'TOP',        sub: 'Community Feed' },
     { id: 'item1',     title: 'ÚLTIMOS DIRECTOS', sub: 'Archive' },
-    { id: 'item2',     title: 'SUSCRIPTORES', sub: 'VETERANOS' },
   ];
 
   // ─── DOM REFS ───────────────────────────
@@ -158,10 +150,6 @@ console.log('[OUTRO ENGINE] Script inicializado');
       case 'horario':  renderSchedule(); break;
       case 'topcanal': renderFeed(); break;
       case 'item1':    renderRecentStreams(); break;
-      case 'item2':    
-        veteransIndex = 0; 
-        renderVeterans(); 
-        break;
       default: renderPlaceholder(activeItem.title);
     }
   }
@@ -654,15 +642,6 @@ console.log('[OUTRO ENGINE] Script inicializado');
 
     if (activeItem.id === 'topcanal') {
       feedIndex = (feedIndex + 5) % feedQueue.length;
-    }
-    if (activeItem.id === 'item2') {
-      const filtered = allUsers.filter(u => {
-        const name = (u.displayName || u._id || '').toLowerCase();
-        return name !== 'liiukiin' && (u.subMonths || u.months || 0) > 0;
-      });
-      if (filtered.length > 0) {
-        veteransIndex = (veteransIndex + 5) % filtered.length;
-      }
     }
 
     currentMenuIndex = (currentMenuIndex + 1) % MENU_ITEMS.length;
