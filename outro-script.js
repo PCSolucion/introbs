@@ -42,6 +42,10 @@ console.log('[OUTRO ENGINE] Script inicializado');
   const gameImageCache = {};
 
   async function getGameImage(gameName) {
+    if (!gameName) return '';
+    if (gameName.trim().toUpperCase() === 'DESCANSO') {
+      return 'fondos/descanso.png';
+    }
     if (gameImageCache[gameName]) return gameImageCache[gameName];
     try {
       const res = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(gameName)}&page_size=1`);
@@ -57,11 +61,11 @@ console.log('[OUTRO ENGINE] Script inicializado');
   }
 
   const SCHEDULE = {
-    lunes:    [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
-    martes:   [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
-    miercoles:[ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
-    jueves:   [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
-    viernes:  [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
+    lunes:    [ { game: 'Once Human', time: '17:00' }, { game: 'GTA San Andreas', time: '22:00' } ],
+    martes:   [ { game: 'Once Human', time: '17:00' }, { game: 'GTA San Andreas', time: '22:00' } ],
+    miercoles:[ { game: 'Once Human', time: '17:00' }, { game: 'GTA San Andreas', time: '22:00' } ],
+    jueves:   [ { game: 'Once Human', time: '17:00' }, { game: 'GTA San Andreas', time: '22:00' } ],
+    viernes:  [ { game: 'Once Human', time: '17:00' }, { game: 'GTA San Andreas', time: '22:00' } ],
   };
 
   const MENU_ITEMS = [
@@ -407,6 +411,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
     img.style.width = '100%';
     img.style.height = '100%';
     img.style.objectFit = 'cover';
+    img.style.objectPosition = stream.game.trim().toUpperCase() === 'DESCANSO' ? 'center 25%' : 'center';
     img.style.opacity = '0';
     img.style.transform = 'scale(1)';
     img.style.transition = 'opacity 1.5s ease, transform 25s linear';

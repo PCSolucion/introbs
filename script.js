@@ -43,6 +43,10 @@ console.log('[ENGINE] Script inicializado');
   const gameImageCache = {};
 
   async function getGameImage(gameName) {
+    if (!gameName) return '';
+    if (gameName.trim().toUpperCase() === 'DESCANSO') {
+      return 'fondos/descanso.png';
+    }
     if (gameImageCache[gameName]) return gameImageCache[gameName];
     try {
       const res = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(gameName)}&page_size=1`);
@@ -59,11 +63,11 @@ console.log('[ENGINE] Script inicializado');
 
   // Estructura fácil de modificar: un arreglo de juegos por cada día
   const SCHEDULE = {
-    lunes:    [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
-    martes:   [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
-    miercoles:[ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
-    jueves:   [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
-    viernes:  [ { game: 'Once Human', time: '17:00' }, { game: 'Banishers: Ghosts of new eden', time: '22:00' } ],
+    lunes:    [ { game: 'Once Human', time: '15:00' }, { game: 'Assasins Creed Origins', time: '22:00' } ],
+    martes:   [ { game: 'Once Human', time: '15:00' }, { game: 'DESCANSO', time: '22:00' } ],
+    miercoles:[ { game: 'Once Human', time: '15:00' }, { game: 'Assasins Creed Origins', time: '22:00' } ],
+    jueves:   [ { game: 'New World', time: '15:00' }, { game: 'Assasins Creed Origins', time: '22:00' } ],
+    viernes:  [ { game: 'DESCANSO', time: '' }, { game: 'Assasins Creed Origins', time: '22:00' } ],
   };
   const DAY_NAMES = {
     lunes: 'LUNES', martes: 'MARTES', miercoles: 'MIÉRCOLES',
@@ -369,7 +373,7 @@ console.log('[ENGINE] Script inicializado');
         gameCard.innerHTML = `
           <!-- Imagen con efecto de zoom suave al cargar -->
           <img class="sch-new-img" data-game="${g.game}" data-active="${active}" src="" style="
-            position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.8s ease, transform 15s linear; transform: scale(1);
+            position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: ${g.game.trim().toUpperCase() === 'DESCANSO' ? 'center 25%' : 'center'}; opacity: 0; transition: opacity 0.8s ease, transform 15s linear; transform: scale(1);
           ">
           <!-- Degradado inferior para resaltar texto -->
           <div style="
