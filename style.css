@@ -27,6 +27,11 @@
   --font-ui: 'Rajdhani', sans-serif;
   --font-mono: 'Share Tech Mono', monospace;
 
+  /* Alias de compatibilidad para tipografías */
+  --font-orbitron: var(--font-title);
+  --font-rajdhani: var(--font-ui);
+  --font-cyber: var(--font-title);
+
   --glow-red: 0 0 4px var(--cyber-red), 0 0 14px rgba(var(--cyber-red-rgb), 0.35);
   --glow-cyan: 0 0 4px var(--cyber-cyan), 0 0 12px rgba(var(--cyber-cyan-rgb), 0.2);
 }
