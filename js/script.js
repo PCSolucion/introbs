@@ -55,9 +55,7 @@ console.log('[INTRO] Script inicializado');
       dayRow.style.paddingBottom = '10px';
 
       const dayLabel = document.createElement('div');
-      dayLabel.style.width = '125px';
-      dayLabel.style.textAlign = 'right';
-      dayLabel.style.flexShrink = '0';
+      dayLabel.className = 'sch-day-label';
 
       const isMiercoles = k === 'miercoles';
       const titleFontSize = isMiercoles ? (active ? '1.5rem' : '1.1rem') : (active ? '1.8rem' : '1.3rem');
@@ -67,7 +65,7 @@ console.log('[INTRO] Script inicializado');
         <div style="font-family: var(--font-title); font-size: ${titleFontSize}; font-weight: 800; color: ${active ? '#fff' : 'rgba(255,255,255,0.6)'}; letter-spacing: 1px; transition: all 0.3s ease; text-transform: uppercase; text-shadow: ${active ? '0 0 15px rgba(var(--cyber-red-rgb), 0.7)' : 'none'};">
           ${DAY_NAMES[k]} <span style="font-family: var(--font-mono); font-size: ${dateFontSize}; color: ${active ? '#fff' : 'rgba(255,255,255,0.4)'}; text-shadow: ${active ? '0 0 10px rgba(255,255,255,0.8)' : 'none'};">${displayDate}</span>
         </div>
-        ${active ? '<div style="font-family: var(--font-mono); font-size: 0.85rem; background: var(--cyber-red); color: #fff; padding: 2px 10px; display: inline-block; margin-top: 4px; font-weight: bold; letter-spacing: 2px; box-shadow: 0 0 12px rgba(var(--cyber-red-rgb), 0.7); clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);">HOY</div>' : ''}
+        ${active ? '<div class="sch-badge-today">HOY</div>' : ''}
       `;
       dayRow.appendChild(dayLabel);
 

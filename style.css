@@ -888,3 +888,119 @@ html, body {
   letter-spacing: 2px;
 }
 
+/* ─── CLASES DE UTILIDAD (REFACTORIZACIÓN INTRO / OUTRO) ─── */
+.sch-day-label {
+  width: 125px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.sch-badge-today {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  background: var(--cyber-red);
+  color: #fff;
+  padding: 2px 10px;
+  display: inline-block;
+  margin-top: 4px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  box-shadow: 0 0 12px rgba(var(--cyber-red-rgb), 0.7);
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+
+.sch-outro-header {
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  color: var(--cyber-red);
+  text-shadow: var(--glow-red);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.sch-outro-game-title {
+  font-family: var(--font-title);
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.9);
+  line-height: 1.1;
+  margin-bottom: 12px;
+  max-width: 65%;
+}
+
+.sch-outro-date {
+  font-family: var(--font-ui);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.9);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sch-outro-time-badge {
+  font-family: var(--font-mono);
+  font-size: 2.1rem;
+  font-weight: bold;
+  color: var(--cyber-red);
+  background: rgba(0,0,0,0.75);
+  border: 1px solid var(--cyber-red);
+  padding: 5px 16px;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  box-shadow: var(--glow-red);
+}
+
+.sch-countdown-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background: rgba(var(--cyber-red-rgb), 0.08);
+  border: 1px solid rgba(var(--cyber-red-rgb), 0.2);
+  border-left: 4px solid var(--cyber-red);
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.sch-countdown-label {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.sch-countdown-clock {
+  font-family: var(--font-mono);
+  font-size: 3.2rem;
+  font-weight: bold;
+  color: #fff;
+  letter-spacing: 2px;
+  text-shadow: 0 0 15px rgba(255,255,255, 0.2), 0 0 10px rgba(var(--cyber-red-rgb), 0.3);
+}
+
+.sch-outro-footer {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: 1.5px;
+  margin-top: 10px;
+}
+
+.sch-outro-pulse-indicator {
+  width: 8px;
+  height: 8px;
+  background-color: var(--cyber-red);
+  box-shadow: var(--glow-red);
+  border-radius: 50%;
+  animation: logPulse 1.5s infinite ease-in-out;
+}
+
+
