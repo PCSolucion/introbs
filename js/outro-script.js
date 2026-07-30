@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════
    CYBERPUNK 2077 STREAM OUTRO — outro-script.js
    Logica exclusiva del OUTRO: busqueda del siguiente
    stream + renderSchedule() con countdown. El resto
@@ -54,7 +54,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
   }
 
   // ─── LOGICA DE BUSQUEDA DEL SIGUIENTE STREAM ─────────────
-  const dayKeys = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+  const dayKeys = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
 
   function findNextStream() {
     const now = new Date();
