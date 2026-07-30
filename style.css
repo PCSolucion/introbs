@@ -804,6 +804,23 @@ html, body {
   min-height: 320px;
 }
 
+.sch-card.sch-card-rest {
+  opacity: 0.65;
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  filter: grayscale(40%);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+.sch-card.sch-card-rest .sch-card-title {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sch-card.sch-card-rest .sch-card-badge {
+  background: rgba(0, 0, 0, 0.85);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.6);
+}
+
 /* Borde superior decorativo ajustado al bisel */
 .sch-card::before {
   content: '';

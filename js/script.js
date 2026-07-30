@@ -75,13 +75,14 @@ console.log('[INTRO] Script inicializado');
       gamesCol.style.gap = '30px';
 
       gamesList.forEach(g => {
+        const isRest = g.game.trim().toUpperCase() === 'DESCANSO';
         const gameCard = document.createElement('div');
-        gameCard.className = `sch-card ${active ? 'active-day' : ''}`;
+        gameCard.className = `sch-card ${active ? 'active-day' : ''} ${isRest ? 'sch-card-rest' : ''}`;
 
         const { startTimeStr, endTimeStr } = parseStreamTime(g.time);
 
         const syncUrl = getGameImageSync(g.game);
-        const objectPositionStyle = g.game.trim().toUpperCase() === 'DESCANSO' ? 'center 25%' : 'center';
+        const objectPositionStyle = isRest ? 'center 25%' : 'center';
 
         gameCard.innerHTML = `
           <img class="sch-card-img sch-new-img" data-game="${g.game}" data-active="${active}" src="${syncUrl}" style="object-position: ${objectPositionStyle}; ${syncUrl ? 'opacity: 1; transform: scale(1.08);' : ''}">
