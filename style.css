@@ -155,11 +155,17 @@ html, body {
 }
 .panel-list::-webkit-scrollbar { width: 0; }
 
-/* El contentArea (panel derecho) necesita padding-left extra para librar la diagonal */
+/* El contentArea (panel derecho) necesita padding-left extra para librar la diagonal y empieza más arriba de forma natural */
 #contentArea {
-  padding-left: 200px;
-  padding-right: 30px;
-  padding-top: 340px;
+  padding: 80px 30px 80px 200px;
+}
+
+/* Contenedor flexible para estructurar el contenido de las vistas */
+.content-view-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
 }
 
 /* ═══════════════════

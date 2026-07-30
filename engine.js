@@ -184,12 +184,7 @@ export function renderFeed(contentArea, allUsers) {
   }
 
   const feedContainer = document.createElement('div');
-  feedContainer.style.display = 'flex';
-  feedContainer.style.flexDirection = 'column';
-  feedContainer.style.padding = '0 20px 20px 0';
-  feedContainer.style.marginTop = '-260px';
-  feedContainer.style.height = 'calc(100vh - 80px)';
-  feedContainer.style.justifyContent = 'space-between';
+  feedContainer.className = 'content-view-container';
 
   top10.forEach((u, i) => {
     const row = document.createElement('div');

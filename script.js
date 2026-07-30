@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════
    CYBERPUNK 2077 STREAM INTRO — script.js
    Logica exclusiva de la INTRO: renderSchedule() con vista
    de semana completa. El resto viene de engine.js
@@ -71,12 +71,7 @@ console.log('[ENGINE] Script inicializado');
     });
 
     const scheduleContainer = document.createElement('div');
-    scheduleContainer.style.display = 'flex';
-    scheduleContainer.style.flexDirection = 'column';
-    scheduleContainer.style.padding = '0 20px 20px 0';
-    scheduleContainer.style.marginTop = '-260px';
-    scheduleContainer.style.height = 'calc(100vh - 80px)';
-    scheduleContainer.style.justifyContent = 'space-between';
+    scheduleContainer.className = 'content-view-container';
 
     Object.entries(SCHEDULE).forEach(([k, gamesList], i) => {
       const active = k === todayKey;

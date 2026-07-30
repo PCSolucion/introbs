@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════
    CYBERPUNK 2077 STREAM OUTRO — outro-script.js
    Logica exclusiva del OUTRO: busqueda del siguiente
    stream + renderSchedule() con countdown. El resto
@@ -135,14 +135,9 @@ console.log('[OUTRO ENGINE] Script inicializado');
     const [startStr]   = stream.time.split('-');
 
     const container = document.createElement('div');
-    container.className = 'feed-enter';
-    container.style.display = 'flex';
-    container.style.flexDirection = 'column';
+    container.className = 'content-view-container feed-enter';
     container.style.gap = '25px';
-    container.style.marginTop = '-260px';
-    container.style.height = 'calc(100vh - 80px)';
     container.style.justifyContent = 'center';
-    container.style.paddingRight = '20px';
 
     // Cabecera
     const headerEl = document.createElement('div');
