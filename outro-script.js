@@ -152,63 +152,35 @@ console.log('[OUTRO ENGINE] Script inicializado');
 
     // Caja de juego
     const gameDisplay = document.createElement('div');
-    gameDisplay.style.position  = 'relative';
-    gameDisplay.style.width     = '100%';
-    gameDisplay.style.height    = '320px';
-    gameDisplay.style.minHeight = '320px';
-    gameDisplay.style.overflow  = 'hidden';
-    gameDisplay.style.border    = '1px solid rgba(255,255,255,0.08)';
-    gameDisplay.style.clipPath  = 'polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px)';
-    gameDisplay.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+    gameDisplay.className = 'sch-card active-day outro-version';
 
-    const imgFallback = document.createElement('div');
-    imgFallback.style.position   = 'absolute';
-    imgFallback.style.inset      = '0';
-    imgFallback.style.background = '#0d0d15';
-    imgFallback.style.zIndex     = '-1';
-    gameDisplay.appendChild(imgFallback);
+    const objectPositionStyle = stream.game.trim().toUpperCase() === 'DESCANSO' ? 'center 25%' : 'center';
 
-    const img = document.createElement('img');
-    img.style.position       = 'absolute';
-    img.style.inset          = '0';
-    img.style.width          = '100%';
-    img.style.height         = '100%';
-    img.style.objectFit      = 'cover';
-    img.style.objectPosition = stream.game.trim().toUpperCase() === 'DESCANSO' ? 'center 25%' : 'center';
-    img.style.opacity        = '0';
-    img.style.transform      = 'scale(1)';
-    img.style.transition     = 'opacity 1.5s ease, transform 25s linear';
-    gameDisplay.appendChild(img);
-
-    const overlay = document.createElement('div');
-    overlay.style.position       = 'absolute';
-    overlay.style.inset          = '0';
-    overlay.style.background     = 'linear-gradient(0deg, rgba(10,10,15,0.95) 0%, rgba(10,10,15,0.4) 65%, transparent 100%)';
-    overlay.style.display        = 'flex';
-    overlay.style.flexDirection  = 'column';
-    overlay.style.justifyContent = 'flex-end';
-    overlay.style.padding        = '25px';
-    overlay.innerHTML = `
-      <h2 style="font-family: var(--font-title); font-size: 2.6rem; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 1px; text-shadow: 2px 2px 6px rgba(0,0,0,0.9); line-height: 1.1; margin-bottom: 12px;">
-        ${stream.game}
-      </h2>
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-family: var(--font-ui); font-size: 1.6rem; font-weight: 700; color: #fff; text-shadow: 1px 1px 4px rgba(0,0,0,0.9); text-transform: uppercase; letter-spacing: 1px;">
-          ${formattedDay}
-        </span>
-        <span style="font-family: var(--font-mono); font-size: 2.1rem; font-weight: bold; color: var(--cyber-red); background: rgba(0,0,0,0.75); border: 1px solid var(--cyber-red); padding: 5px 16px; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); box-shadow: var(--glow-red);">
-          ${startStr.trim()}
-        </span>
+    gameDisplay.innerHTML = `
+      <img class="sch-card-img sch-new-img" data-game="${stream.game}" src="" style="object-position: ${objectPositionStyle};">
+      <div class="sch-card-overlay"></div>
+      <div class="sch-card-content">
+        <h2 style="font-family: var(--font-title); font-size: 2.6rem; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 1px; text-shadow: 2px 2px 6px rgba(0,0,0,0.9); line-height: 1.1; margin-bottom: 12px; max-width: 65%;">
+          ${stream.game}
+        </h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+          <span style="font-family: var(--font-ui); font-size: 1.6rem; font-weight: 700; color: #fff; text-shadow: 1px 1px 4px rgba(0,0,0,0.9); text-transform: uppercase; letter-spacing: 1px;">
+            ${formattedDay}
+          </span>
+          <span style="font-family: var(--font-mono); font-size: 2.1rem; font-weight: bold; color: var(--cyber-red); background: rgba(0,0,0,0.75); border: 1px solid var(--cyber-red); padding: 5px 16px; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); box-shadow: var(--glow-red);">
+            ${startStr.trim()}
+          </span>
+        </div>
       </div>
     `;
-    gameDisplay.appendChild(overlay);
     container.appendChild(gameDisplay);
 
-    // Carga de imagen async
+    // Cargar imagen de RAWG API
+    const img = gameDisplay.querySelector('.sch-card-img');
     getGameImage(stream.game).then(url => {
       if (url) {
         img.src = url;
-        img.style.opacity   = '0.55';
+        img.style.opacity = '0.55';
         img.style.transform = 'scale(1.06)';
       }
     });

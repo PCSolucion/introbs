@@ -111,37 +111,25 @@ console.log('[ENGINE] Script inicializado');
 
       gamesList.forEach(g => {
         const gameCard = document.createElement('div');
-        gameCard.style.flex = '1';
-        gameCard.style.height = '100%';
-        gameCard.style.minHeight = '180px';
-        gameCard.style.position = 'relative';
-        gameCard.style.background = 'transparent';
-        gameCard.style.boxShadow = active ? '0 0 25px rgba(var(--cyber-red-rgb), 0.2)' : 'none';
-        gameCard.style.clipPath = 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)';
+        gameCard.className = `sch-card ${active ? 'active-day' : ''}`;
 
         const timeParts = g.time.split('-');
         const startTimeStr = timeParts[0] ? timeParts[0].trim() : g.time;
         const endTimeStr   = timeParts[1] ? timeParts[1].trim() : '';
 
+        // Definimos el estilo de posición de la imagen de forma dinámica solo para el object-position
+        const objectPositionStyle = g.game.trim().toUpperCase() === 'DESCANSO' ? 'center 25%' : 'center';
+
         gameCard.innerHTML = `
-          <img class="sch-new-img" data-game="${g.game}" data-active="${active}" src="" style="
-            position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-            object-position: ${g.game.trim().toUpperCase() === 'DESCANSO' ? 'center 25%' : 'center'};
-            opacity: 0; transition: opacity 0.8s ease, transform 15s linear; transform: scale(1);
-          ">
-          <div style="position: absolute; inset: 0; background: linear-gradient(0deg, rgba(5,5,10,0.95) 0%, rgba(5,5,10,0.4) 50%, transparent 100%);"></div>
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: flex-end;">
-            <div style="display: flex; flex-direction: column; max-width: 65%;">
-              <span style="font-family: var(--font-title); font-size: 1.5rem; font-weight: 800; color: #fff; text-shadow: 2px 2px 5px rgba(0,0,0,1); letter-spacing: 1px; line-height: 1.1;">
-                ${g.game}
-              </span>
-            </div>
-            <div style="background: rgba(0,0,0,0.7); border: 1px solid ${active ? 'var(--cyber-red)' : 'rgba(255,255,255,0.4)'}; padding: 6px 14px; font-family: var(--font-mono); color: ${active ? 'var(--cyber-red)' : '#fff'}; backdrop-filter: blur(8px); clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); box-shadow: ${active ? '0 0 12px rgba(var(--cyber-red-rgb), 0.4)' : 'none'}; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;">
-              <span style="font-size: 1.8rem; font-weight: bold;">${startTimeStr}</span>
-              ${endTimeStr ? `<span style="font-size: 0.9rem; font-weight: bold; opacity: 0.8; margin-top: 3px; letter-spacing: 2px;">${endTimeStr}</span>` : ''}
+          <img class="sch-card-img sch-new-img" data-game="${g.game}" data-active="${active}" src="" style="object-position: ${objectPositionStyle};">
+          <div class="sch-card-overlay"></div>
+          <div class="sch-card-content">
+            <div class="sch-card-title">${g.game}</div>
+            <div class="sch-card-badge">
+              <span class="sch-card-badge-time">${startTimeStr}</span>
+              ${endTimeStr ? `<span class="sch-card-badge-endtime">${endTimeStr}</span>` : ''}
             </div>
           </div>
-          <div style="position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: ${active ? 'var(--cyber-red)' : 'rgba(255,255,255,0.1)'};"></div>
         `;
         gamesCol.appendChild(gameCard);
       });
