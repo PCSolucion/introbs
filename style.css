@@ -66,6 +66,9 @@ html, body {
   object-position: 65% 20%; /* Desplazar a la derecha y un poco arriba */
   opacity: 0;
   transition: opacity 1.5s ease-in-out;
+  will-change: opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 .bg-video.active {
   opacity: 1;
@@ -75,7 +78,13 @@ html, body {
    BG ORBS
    ═══════════════════ */
 .bg-layer { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
-.bg-orb { position: absolute; border-radius: 50%; filter: blur(160px); }
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(160px);
+  will-change: transform;
+  transform: translateZ(0);
+}
 .bg-orb.orb-1 {
   width: 800px; height: 800px;
   background: rgba(var(--cyber-red-rgb), 0.05);
@@ -89,8 +98,8 @@ html, body {
   animation: drift 24s ease-in-out infinite reverse;
 }
 @keyframes drift {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(70px, 50px); }
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(70px, 50px, 0); }
 }
 
 .game-hud {
@@ -121,6 +130,8 @@ html, body {
   display: flex; flex-direction: column;
   overflow: visible;
   animation: panelIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+  transform: translateZ(0);
 }
 
 /* Panel Izquierdo (Horario) - Diagonal Tekken y Rojo uniforme */
