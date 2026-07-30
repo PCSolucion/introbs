@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════
    CYBERPUNK 2077 STREAM INTRO — script.js
    Logica exclusiva de la INTRO: renderSchedule() con vista
    de semana completa. El resto viene de engine.js
@@ -78,7 +78,7 @@ console.log('[ENGINE] Script inicializado');
       const displayDate = active ? dateObj.day : `${dateObj.day} ${dateObj.month}`;
 
       const dayRow = document.createElement('div');
-      dayRow.className = 'feed-enter';
+      dayRow.className = `sch-day-row feed-enter ${active ? 'active-day-row' : ''}`;
       dayRow.style.animationDelay = `${i * 0.1}s`;
       dayRow.style.display = 'flex';
       dayRow.style.alignItems = 'center';
@@ -92,14 +92,14 @@ console.log('[ENGINE] Script inicializado');
       dayLabel.style.flexShrink = '0';
 
       const isMiercoles = k === 'miercoles';
-      const titleFontSize = isMiercoles ? (active ? '1.4rem' : '1.2rem') : (active ? '1.8rem' : '1.5rem');
-      const dateFontSize  = isMiercoles ? (active ? '1.1rem' : '1rem')   : (active ? '1.5rem' : '1.2rem');
+      const titleFontSize = isMiercoles ? (active ? '1.5rem' : '1.1rem') : (active ? '1.8rem' : '1.3rem');
+      const dateFontSize  = isMiercoles ? (active ? '1.2rem' : '0.9rem') : (active ? '1.5rem' : '1.1rem');
 
       dayLabel.innerHTML = `
-        <div style="font-family: var(--font-title); font-size: ${titleFontSize}; font-weight: 800; color: #fff; letter-spacing: 1px; transition: all 0.3s ease; text-transform: uppercase; text-shadow: ${active ? '0 0 15px rgba(255,255,255, 0.5)' : 'none'};">
-          ${DAY_NAMES[k]} <span style="font-family: var(--font-mono); font-size: ${dateFontSize}; color: ${active ? '#fff' : 'rgba(255,255,255,0.8)'};">${displayDate}</span>
+        <div style="font-family: var(--font-title); font-size: ${titleFontSize}; font-weight: 800; color: ${active ? '#fff' : 'rgba(255,255,255,0.6)'}; letter-spacing: 1px; transition: all 0.3s ease; text-transform: uppercase; text-shadow: ${active ? '0 0 15px rgba(var(--cyber-red-rgb), 0.7)' : 'none'};">
+          ${DAY_NAMES[k]} <span style="font-family: var(--font-mono); font-size: ${dateFontSize}; color: ${active ? '#fff' : 'rgba(255,255,255,0.4)'}; text-shadow: ${active ? '0 0 10px rgba(255,255,255,0.8)' : 'none'};">${displayDate}</span>
         </div>
-        ${active ? '<div style="font-family: var(--font-mono); font-size: 0.9rem; background: var(--cyber-red); color: #fff; padding: 2px 10px; display: inline-block; margin-top: 4px; font-weight: bold; letter-spacing: 1px; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);">HOY</div>' : ''}
+        ${active ? '<div style="font-family: var(--font-mono); font-size: 0.85rem; background: var(--cyber-red); color: #fff; padding: 2px 10px; display: inline-block; margin-top: 4px; font-weight: bold; letter-spacing: 2px; box-shadow: 0 0 12px rgba(var(--cyber-red-rgb), 0.7); clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);">HOY</div>' : ''}
       `;
       dayRow.appendChild(dayLabel);
 
