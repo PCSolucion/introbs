@@ -1,4 +1,4 @@
-﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    STREAM OUTRO â€” outro-script.js
    Logica exclusiva del OUTRO: busqueda del siguiente
    stream + renderSchedule() con countdown. El resto
@@ -74,6 +74,9 @@ console.log('[OUTRO ENGINE] Script inicializado');
 
       if (dayStreams && dayStreams.length > 0) {
         for (const stream of dayStreams) {
+          // Ignorar días o franjas marcadas como DESCANSO
+          if (stream.game && stream.game.trim().toUpperCase() === 'DESCANSO') continue;
+
           const [startStr] = stream.time.split('-');
           const [startHour, startMin] = startStr.trim().split(':').map(Number);
           const streamTimeInMinutes = startHour * 60 + startMin;
@@ -90,7 +93,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
       if (foundStream) break;
     }
 
-    // Fallback: buscar en la semana siguiente
+    // Fallback: buscar en la semana siguiente si no se encontró directo activo en los 7 días inmediatos
     if (!foundStream) {
       for (let offset = 7; offset < 14; offset++) {
         const checkDate = new Date(now);
@@ -100,15 +103,19 @@ console.log('[OUTRO ENGINE] Script inicializado');
         const dayStreams = SCHEDULE[dayKey];
 
         if (dayStreams && dayStreams.length > 0) {
-          const stream = dayStreams[0];
-          const [startStr] = stream.time.split('-');
-          const [startHour, startMin] = startStr.trim().split(':').map(Number);
-          foundStream  = stream;
-          targetDate   = new Date(checkDate);
-          targetDate.setHours(startHour, startMin, 0, 0);
-          targetOffset = offset;
-          break;
+          for (const stream of dayStreams) {
+            if (stream.game && stream.game.trim().toUpperCase() === 'DESCANSO') continue;
+
+            const [startStr] = stream.time.split('-');
+            const [startHour, startMin] = startStr.trim().split(':').map(Number);
+            foundStream  = stream;
+            targetDate   = new Date(checkDate);
+            targetDate.setHours(startHour, startMin, 0, 0);
+            targetOffset = offset;
+            break;
+          }
         }
+        if (foundStream) break;
       }
     }
 
