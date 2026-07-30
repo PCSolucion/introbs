@@ -28,7 +28,6 @@ console.log('[OUTRO ENGINE] Script inicializado');
   let currentMenuIndex = 0;
   let allUsers = [];
   let recentStreams = [];
-  let feedQueue = [];
   let countdownInterval = null;
 
   // ─── BACKGROUNDS (VIDEO) ────────────────
@@ -281,7 +280,6 @@ console.log('[OUTRO ENGINE] Script inicializado');
   function applyData(users, streams) {
     allUsers = users;
     updateRankingHistory(users);
-    feedQueue = buildFeedQueue(allUsers);
     recentStreams = streams;
     renderActiveContent();
   }

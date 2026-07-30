@@ -279,7 +279,7 @@ export function renderRecentStreams(contentArea, recentStreams) {
 }
 
 // ─── RENDER: VETERANOS (SUBS) ─────────────────────────
-export function renderVeterans(contentArea, allUsers, veteransIndex) {
+export function renderVeterans(contentArea, allUsers, veteransIndex = 0) {
   if (allUsers.length === 0) {
     renderPlaceholder(contentArea, 'CARGANDO DATOS...');
     return;

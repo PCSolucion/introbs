@@ -27,7 +27,6 @@ console.log('[ENGINE] Script inicializado');
   let currentMenuIndex = 0;
   let allUsers = [];
   let recentStreams = [];
-  let feedQueue = [];
 
   // ─── BACKGROUNDS (VIDEO) ────────────────
   initVideoBackground();
@@ -173,7 +172,6 @@ console.log('[ENGINE] Script inicializado');
   function applyData(users, streams) {
     allUsers = users;
     updateRankingHistory(users);
-    feedQueue = buildFeedQueue(allUsers);
     recentStreams = streams;
     renderActiveContent();
   }
