@@ -1,7 +1,7 @@
-/* ═══════════════════════════════════════════════════════
-   ENGINE.JS — Lógica compartida entre script.js y outro-script.js
-   Contiene: helpers, caché, Firestore, vídeos, menú, feed, renders comunes
-   ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   ENGINE.JS â€” LÃ³gica compartida entre script.js y outro-script.js
+   Contiene: helpers, cachÃ©, Firestore, vÃ­deos, menÃº, feed, renders comunes
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 import { db } from './firebase.js';
 import { collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js';
@@ -10,7 +10,7 @@ import { SCHEDULE } from './schedule.js';
 
 export { SCHEDULE };
 
-// ─── TÍTULOS DE NIVEL ───────────────────────────────
+// â”€â”€â”€ TÃTULOS DE NIVEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const LEVEL_TITLES = {
   1: 'CIVILIAN', 5: 'ROOKIE', 10: 'MERCENARY',
   15: 'SOLO', 20: 'NETRUNNER', 30: 'FIXER',
@@ -25,7 +25,7 @@ export function getTitle(level) {
   return `EDGE RUNNER LVL ${level}`;
 }
 
-// ─── CONFIGURACIÓN GLOBAL ───────────────────────────
+// â”€â”€â”€ CONFIGURACIÃ“N GLOBAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const CONFIG = {
   backgrounds: [
     'fondos/isabela.mp4', 'fondos/bloodborne.mp4', 'fondos/ciri.mp4', 'fondos/claire.mp4',
@@ -40,7 +40,7 @@ export const CONFIG = {
   countdownMinutes: 5,
 };
 
-// ─── CACHÉ DE IMÁGENES DE JUEGOS ────────────────────
+// â”€â”€â”€ CACHÃ‰ DE IMÃGENES DE JUEGOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const gameImageCache = {};
 
 export async function getGameImage(gameName) {
@@ -63,17 +63,17 @@ export async function getGameImage(gameName) {
 
 // ─── MENÚ ────────────────────────────────────────────
 export const MENU_ITEMS = [
-  { id: 'horario',  title: 'HORARIOS',        sub: 'Stream Schedule' },
+  { id: 'horario',  title: 'HORARIOS',         sub: 'Stream Schedule' },
   { id: 'topcanal', title: 'TOP',              sub: 'Community Feed' },
-  { id: 'item1',    title: 'ÚLTIMOS DIRECTOS', sub: 'Archive' },
+  { id: 'item1',    title: 'ULTIMOS DIRECTOS', sub: 'Archive' },
 ];
 
 export const DAY_NAMES = {
-  lunes: 'LUNES', martes: 'MARTES', miercoles: 'MIÉRCOLES',
+  lunes: 'LUNES', martes: 'MARTES', miercoles: 'MIERCOLES',
   jueves: 'JUEVES', viernes: 'VIERNES',
 };
 
-// ─── HELPERS ─────────────────────────────────────────
+// â”€â”€â”€ HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function formatDisplayName(u) {
   let name = (u.displayName || u._id || 'UNKNOWN').toUpperCase();
   if (name === 'C_H_A_N_D_A_L_F') return 'CHANDALF';
@@ -99,7 +99,7 @@ export function formatTime(minutes) {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-// ─── SISTEMA DE VÍDEOS DE FONDO ─────────────────────
+// â”€â”€â”€ SISTEMA DE VÃDEOS DE FONDO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function initVideoBackground() {
   const v1 = document.getElementById('bgVideo1');
   const v2 = document.getElementById('bgVideo2');
@@ -143,7 +143,7 @@ export function initVideoBackground() {
   setInterval(switchVideo, CONFIG.bgInterval);
 }
 
-// ─── RENDER: MENÚ ─────────────────────────────────────
+// â”€â”€â”€ RENDER: MENÃš â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function renderMenu(menuList, currentMenuIndex) {
   menuList.innerHTML = '';
   MENU_ITEMS.forEach((item, idx) => {
@@ -160,7 +160,7 @@ export function renderMenu(menuList, currentMenuIndex) {
   });
 }
 
-// ─── RENDER: FEED (TOP 10) ────────────────────────────
+// â”€â”€â”€ RENDER: FEED (TOP 10) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function renderFeed(contentArea, allUsers) {
   if (allUsers.length === 0) {
     renderPlaceholder(contentArea, 'CARGANDO DATOS...');
@@ -234,7 +234,7 @@ export function renderFeed(contentArea, allUsers) {
   contentArea.appendChild(feedContainer);
 }
 
-// ─── RENDER: ÚLTIMOS DIRECTOS ─────────────────────────
+// â”€â”€â”€ RENDER: ÃšLTIMOS DIRECTOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function renderRecentStreams(contentArea, recentStreams) {
   if (recentStreams.length === 0) {
     renderPlaceholder(contentArea, 'CARGANDO ARCHIVOS...');
@@ -278,7 +278,7 @@ export function renderRecentStreams(contentArea, recentStreams) {
   contentArea.appendChild(container);
 }
 
-// ─── RENDER: VETERANOS (SUBS) ─────────────────────────
+// â”€â”€â”€ RENDER: VETERANOS (SUBS) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function renderVeterans(contentArea, allUsers, veteransIndex = 0) {
   if (allUsers.length === 0) {
     renderPlaceholder(contentArea, 'CARGANDO DATOS...');
@@ -384,7 +384,7 @@ export function buildFeedQueue(users) {
   return queue;
 }
 
-// ─── CACHE (localStorage) ────────────────────────────
+// â”€â”€â”€ CACHE (localStorage) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const CACHE_TTL           = 1 * 60 * 60 * 1000; // 1 hora
 const CACHE_KEY_USERS     = 'introbs_cache_users_v4';
 const CACHE_KEY_STREAMS   = 'introbs_cache_streams_v4';
@@ -421,7 +421,7 @@ export function loadFromCache() {
   }
 }
 
-// ─── PROCESO DE STREAMS ───────────────────────────────
+// â”€â”€â”€ PROCESO DE STREAMS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function processStreamsData(data) {
   const possibleHistory = data.history || data.streams || data.list || data;
   let streams = [];
@@ -486,7 +486,7 @@ export function processStreamsData(data) {
   return result;
 }
 
-// ─── RANKING ──────────────────────────────────────────
+// â”€â”€â”€ RANKING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function getRankedUserIds(users) {
   const filtered = users.filter(u => (u.displayName || u._id || '').toLowerCase() !== 'liiukiin');
   const sorted = [...filtered].sort((a, b) => {
@@ -527,7 +527,7 @@ export function updateRankingHistory(users) {
   }
 }
 
-// ─── FIRESTORE ────────────────────────────────────────
+// â”€â”€â”€ FIRESTORE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function fetchFromFirestore() {
   console.log('[FIREBASE] Descargando datos frescos de Firestore...');
   const userSnapshot = await getDocs(collection(db, 'users'));
