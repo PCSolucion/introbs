@@ -157,12 +157,16 @@ export function formatTime(minutes) {
 }
 
 // â”€â”€â”€ SISTEMA DE VÃDEOS DE FONDO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── SISTEMA DE VÍDEOS DE FONDO ──────────────────────
 export function initVideoBackground() {
   const v1 = document.getElementById('bgVideo1');
   const v2 = document.getElementById('bgVideo2');
+  if (!v1 || !v2) return;
+
   let activeV = v1;
   let nextV = v2;
   let bgi = 0;
+  let isSwitching = false;
 
   activeV.src = CONFIG.backgrounds[bgi];
   activeV.playbackRate = CONFIG.backgrounds[bgi] === 'fondos/isabela.mp4' ? 0.5 : 1.0;
@@ -170,15 +174,25 @@ export function initVideoBackground() {
   bgi = (bgi + 1) % CONFIG.backgrounds.length;
 
   function switchVideo() {
+    if (isSwitching) return;
+    isSwitching = true;
+
     const videoFile = CONFIG.backgrounds[bgi];
-    nextV.onerror = () => {
+
+    const cleanup = () => {
       nextV.removeEventListener('loadeddata', onLoaded);
+      nextV.removeEventListener('error', onError);
+      isSwitching = false;
+    };
+
+    const onError = () => {
+      cleanup();
       bgi = (bgi + 1) % CONFIG.backgrounds.length;
       setTimeout(switchVideo, 500);
     };
-    async function onLoaded() {
-      nextV.removeEventListener('loadeddata', onLoaded);
-      nextV.onerror = null;
+
+    const onLoaded = async () => {
+      cleanup();
       try {
         nextV.playbackRate = videoFile === 'fondos/isabela.mp4' ? 0.5 : 1.0;
         await nextV.play();
@@ -192,11 +206,14 @@ export function initVideoBackground() {
         bgi = (bgi + 1) % CONFIG.backgrounds.length;
         setTimeout(switchVideo, 1000);
       }
-    }
-    nextV.addEventListener('loadeddata', onLoaded);
+    };
+
+    nextV.addEventListener('loadeddata', onLoaded, { once: true });
+    nextV.addEventListener('error', onError, { once: true });
     nextV.src = videoFile;
     nextV.load();
   }
+
   setInterval(switchVideo, CONFIG.bgInterval);
 }
 
