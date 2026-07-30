@@ -40,29 +40,59 @@ export const CONFIG = {
   countdownMinutes: 5,
 };
 
-// â”€â”€â”€ CACHÃ‰ DE IMÃ GENES DE JUEGOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const gameImageCache = {};
+const RAWG_CACHE_KEY = 'introbs_rawg_image_cache_v1';
+
+function getRawgCache() {
+  try {
+    return JSON.parse(localStorage.getItem(RAWG_CACHE_KEY) || '{}');
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveRawgCache(cache) {
+  try {
+    localStorage.setItem(RAWG_CACHE_KEY, JSON.stringify(cache));
+  } catch (e) {}
+}
 
 export async function preloadGameImage(gameName) {
   if (!gameName) return;
   const url = await getGameImage(gameName);
   if (url) {
     const img = new Image();
-    img.src = url; // Precarga silenciosa en la memoria/búfer del navegador
+    img.src = url;
   }
 }
 
 export async function getGameImage(gameName) {
   if (!gameName) return '';
-  if (gameName.trim().toUpperCase() === 'DESCANSO') return 'fondos/descanso.png';
-  if (gameName.trim().toUpperCase() === 'INFORMATICA') return 'fondos/informatica-bg.jpg';
-  if (gameImageCache[gameName]) return gameImageCache[gameName];
+  const cleanName = gameName.trim();
+  const upper = cleanName.toUpperCase();
+
+  if (upper === 'DESCANSO') return 'fondos/descanso.png';
+  if (upper === 'INFORMATICA') return 'fondos/informatica-bg.jpg';
+
+  // 1. Memoria RAM
+  if (gameImageCache[cleanName]) return gameImageCache[cleanName];
+
+  // 2. LocalStorage (Persistente en el navegador u OBS)
+  const diskCache = getRawgCache();
+  if (diskCache[cleanName]) {
+    gameImageCache[cleanName] = diskCache[cleanName];
+    return diskCache[cleanName];
+  }
+
+  // 3. Si no existe para este juego específico, consultar RAWG API una sola vez
   try {
-    const res = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(gameName)}&page_size=1`);
+    const res = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
     const data = await res.json();
     if (data.results && data.results.length > 0 && data.results[0].background_image) {
-      gameImageCache[gameName] = data.results[0].background_image;
-      return data.results[0].background_image;
+      const imgUrl = data.results[0].background_image;
+      gameImageCache[cleanName] = imgUrl;
+      diskCache[cleanName] = imgUrl;
+      saveRawgCache(diskCache);
+      return imgUrl;
     }
   } catch (e) {
     console.error('Error fetching game image', e);
