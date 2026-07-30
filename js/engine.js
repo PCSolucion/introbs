@@ -74,12 +74,14 @@ export function getGameImageSync(gameName) {
   if (upper === 'DESCANSO') return 'fondos/descanso.png';
   if (upper === 'INFORMATICA') return 'fondos/informatica-bg.jpg';
 
-  if (gameImageCache[cleanName]) return gameImageCache[cleanName];
+  if (gameImageCache[cleanName]) {
+    return gameImageCache[cleanName] === 'NOT_FOUND' ? '' : gameImageCache[cleanName];
+  }
 
   const diskCache = getRawgCache();
   if (diskCache[cleanName]) {
     gameImageCache[cleanName] = diskCache[cleanName];
-    return diskCache[cleanName];
+    return diskCache[cleanName] === 'NOT_FOUND' ? '' : diskCache[cleanName];
   }
 
   return '';
@@ -104,8 +106,15 @@ export async function getGameImage(gameName) {
       return imgUrl;
     }
   } catch (e) {
-    console.error('Error fetching game image', e);
+    console.error('Error fetching game image from RAWG API', e);
   }
+
+  // Si no se encontró o hubo error, guardar NOT_FOUND para no saturar la API en futuras peticiones
+  gameImageCache[cleanName] = 'NOT_FOUND';
+  const diskCache = getRawgCache();
+  diskCache[cleanName] = 'NOT_FOUND';
+  saveRawgCache(diskCache);
+
   return '';
 }
 
