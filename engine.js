@@ -240,6 +240,9 @@ export function renderRecentStreams(contentArea, recentStreams) {
     renderPlaceholder(contentArea, 'CARGANDO ARCHIVOS...');
     return;
   }
+  const container = document.createElement('div');
+  container.className = 'content-view-container centered-group';
+
   recentStreams.forEach((s, i) => {
     const row = document.createElement('div');
     row.className = `schedule-row feed-enter ${i === 0 ? 'active' : ''}`;
@@ -270,8 +273,9 @@ export function renderRecentStreams(contentArea, recentStreams) {
       </div>
       <div class="sch-decor">DB_X${i + 1}</div>
     `;
-    contentArea.appendChild(row);
+    container.appendChild(row);
   });
+  contentArea.appendChild(container);
 }
 
 // ─── RENDER: VETERANOS (SUBS) ─────────────────────────
@@ -290,6 +294,9 @@ export function renderVeterans(contentArea, allUsers, veteransIndex) {
     renderPlaceholder(contentArea, 'SIN DATOS DE SUBS');
     return;
   }
+
+  const container = document.createElement('div');
+  container.className = 'content-view-container centered-group';
 
   const MAX = 5;
   const chunk = sorted.slice(veteransIndex, veteransIndex + MAX);
@@ -315,8 +322,9 @@ export function renderVeterans(contentArea, allUsers, veteransIndex) {
       </div>
       <div class="sch-decor">SUB_0${veteransIndex + i + 1}</div>
     `;
-    contentArea.appendChild(row);
+    container.appendChild(row);
   });
+  contentArea.appendChild(container);
 }
 
 // ─── RENDER: PLACEHOLDER ─────────────────────────────

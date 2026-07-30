@@ -168,6 +168,12 @@ html, body {
   justify-content: space-between;
 }
 
+/* Variante para agrupar filas de forma compacta en el centro vertical */
+.content-view-container.centered-group {
+  justify-content: center;
+  gap: 16px;
+}
+
 /* ═══════════════════
    CARD ITEM — Shared style
    ═══════════════════ */
