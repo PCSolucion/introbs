@@ -46,7 +46,7 @@ const gameImageCache = {};
 export async function getGameImage(gameName) {
   if (!gameName) return '';
   if (gameName.trim().toUpperCase() === 'DESCANSO') return 'fondos/descanso.png';
-  if (gameName.trim().toUpperCase() === 'INFORMATICA') return 'informatica-bg.jpg';
+  if (gameName.trim().toUpperCase() === 'INFORMATICA') return 'fondos/informatica-bg.jpg';
   if (gameImageCache[gameName]) return gameImageCache[gameName];
   try {
     const res = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(gameName)}&page_size=1`);

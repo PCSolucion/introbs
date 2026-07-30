@@ -1,9 +1,9 @@
-/* ═══════════════════════════════════════════════════════
-   CYBERPUNK 2077 STREAM OUTRO — outro-script.js
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   STREAM OUTRO â€” outro-script.js
    Logica exclusiva del OUTRO: busqueda del siguiente
    stream + renderSchedule() con countdown. El resto
    viene de engine.js
-   ═══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 import {
   CONFIG, SCHEDULE, MENU_ITEMS,
@@ -20,20 +20,20 @@ console.log('[OUTRO ENGINE] Script inicializado');
   'use strict';
   console.log('[OUTRO ENGINE] IIFE en ejecucion');
 
-  // ─── DOM REFS ───────────────────────────
+  // â”€â”€â”€ DOM REFS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const menuList    = document.getElementById('menuList');
   const contentArea = document.getElementById('contentArea');
 
-  // ─── STATE ──────────────────────────────
+  // â”€â”€â”€ STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let currentMenuIndex = 0;
   let allUsers = [];
   let recentStreams = [];
   let countdownInterval = null;
 
-  // ─── BACKGROUNDS (VIDEO) ────────────────
+  // â”€â”€â”€ BACKGROUNDS (VIDEO) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   initVideoBackground();
 
-  // ─── MENU SYSTEM ────────────────────────
+  // â”€â”€â”€ MENU SYSTEM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function renderMenuLocal() {
     engineRenderMenu(menuList, currentMenuIndex);
   }
@@ -53,7 +53,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
     }
   }
 
-  // ─── LOGICA DE BUSQUEDA DEL SIGUIENTE STREAM ─────────────
+  // â”€â”€â”€ LOGICA DE BUSQUEDA DEL SIGUIENTE STREAM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const dayKeys = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
 
   function findNextStream() {
@@ -123,7 +123,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
     return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]}`;
   }
 
-  // ─── RENDER: HORARIO (exclusivo del outro — muestra el siguiente stream) ──
+  // â”€â”€â”€ RENDER: HORARIO (exclusivo del outro â€” muestra el siguiente stream) â”€â”€
   function renderSchedule() {
     if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
 
@@ -142,7 +142,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
     const headerEl = document.createElement('div');
     headerEl.style.fontFamily    = 'var(--font-mono)';
     headerEl.style.fontSize      = '1.3rem';
-    headerEl.style.color         = 'var(--cyber-red)';
+    headerEl.style.color         = 'var(--accent-blue)';
     headerEl.style.textShadow    = 'var(--glow-red)';
     headerEl.style.letterSpacing = '3px';
     headerEl.style.textTransform = 'uppercase';
@@ -166,7 +166,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
           <span style="font-family: var(--font-ui); font-size: 1.6rem; font-weight: 700; color: #fff; text-shadow: 1px 1px 4px rgba(0,0,0,0.9); text-transform: uppercase; letter-spacing: 1px;">
             ${formattedDay}
           </span>
-          <span style="font-family: var(--font-mono); font-size: 2.1rem; font-weight: bold; color: var(--cyber-red); background: rgba(0,0,0,0.75); border: 1px solid var(--cyber-red); padding: 5px 16px; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); box-shadow: var(--glow-red);">
+          <span style="font-family: var(--font-mono); font-size: 2.1rem; font-weight: bold; color: var(--accent-blue); background: rgba(0,0,0,0.75); border: 1px solid var(--accent-blue); padding: 5px 16px; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); box-shadow: var(--glow-red);">
             ${startStr.trim()}
           </span>
         </div>
@@ -190,16 +190,16 @@ console.log('[OUTRO ENGINE] Script inicializado');
     countdownBox.style.flexDirection  = 'column';
     countdownBox.style.alignItems     = 'center';
     countdownBox.style.padding        = '20px';
-    countdownBox.style.background     = 'rgba(var(--cyber-red-rgb), 0.08)';
-    countdownBox.style.border         = '1px solid rgba(var(--cyber-red-rgb), 0.2)';
-    countdownBox.style.borderLeft     = '4px solid var(--cyber-red)';
+    countdownBox.style.background     = 'rgba(var(--accent-blue-rgb), 0.08)';
+    countdownBox.style.border         = '1px solid rgba(var(--accent-blue-rgb), 0.2)';
+    countdownBox.style.borderLeft     = '4px solid var(--accent-blue)';
     countdownBox.style.clipPath       = 'polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)';
     countdownBox.style.boxShadow      = '0 5px 15px rgba(0,0,0,0.2)';
     countdownBox.innerHTML = `
       <span style="font-family: var(--font-mono); font-size: 1rem; color: rgba(255,255,255,0.4); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 5px;">
         TIEMPO PARA EL ENLACE
       </span>
-      <div id="countdownClock" style="font-family: var(--font-mono); font-size: 3.2rem; font-weight: bold; color: #fff; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255,255,255, 0.2), 0 0 10px rgba(var(--cyber-red-rgb), 0.3);">
+      <div id="countdownClock" style="font-family: var(--font-mono); font-size: 3.2rem; font-weight: bold; color: #fff; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255,255,255, 0.2), 0 0 10px rgba(var(--accent-blue-rgb), 0.3);">
         00d : 00h : 00m : 00s
       </div>
     `;
@@ -219,7 +219,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
     const logIndicator = document.createElement('span');
     logIndicator.style.width           = '8px';
     logIndicator.style.height          = '8px';
-    logIndicator.style.backgroundColor = 'var(--cyber-red)';
+    logIndicator.style.backgroundColor = 'var(--accent-blue)';
     logIndicator.style.boxShadow       = 'var(--glow-red)';
     logIndicator.style.borderRadius    = '50%';
     logIndicator.style.animation       = 'logPulse 1.5s infinite ease-in-out';
@@ -262,7 +262,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
     countdownInterval = setInterval(updateCountdown, 1000);
   }
 
-  // ─── ROTACION DE MENU ────────────────────
+  // â”€â”€â”€ ROTACION DE MENU â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let menuTimer = null;
   function scheduleNextMenuRotation() {
     clearTimeout(menuTimer);
@@ -276,7 +276,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
     scheduleNextMenuRotation();
   }
 
-  // ─── DATOS (Firestore + cache) ────────────
+  // â”€â”€â”€ DATOS (Firestore + cache) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function applyData(users, streams) {
     allUsers = users;
     updateRankingHistory(users);
@@ -304,7 +304,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
     }
   }
 
-  // ─── INIT ────────────────────────────────
+  // â”€â”€â”€ INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   renderMenuLocal();
   renderActiveContent();
   scheduleNextMenuRotation();

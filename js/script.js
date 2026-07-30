@@ -1,8 +1,8 @@
-/* ═══════════════════════════════════════════════════════
-   CYBERPUNK 2077 STREAM INTRO — script.js
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   STREAM INTRO â€” script.js
    Logica exclusiva de la INTRO: renderSchedule() con vista
    de semana completa. El resto viene de engine.js
-   ═══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 import {
   CONFIG, SCHEDULE, DAY_NAMES, MENU_ITEMS,
@@ -19,19 +19,19 @@ console.log('[ENGINE] Script inicializado');
   'use strict';
   console.log('[ENGINE] IIFE en ejecucion');
 
-  // ─── DOM REFS ───────────────────────────
+  // â”€â”€â”€ DOM REFS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const menuList   = document.getElementById('menuList');
   const contentArea = document.getElementById('contentArea');
 
-  // ─── STATE ──────────────────────────────
+  // â”€â”€â”€ STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let currentMenuIndex = 0;
   let allUsers = [];
   let recentStreams = [];
 
-  // ─── BACKGROUNDS (VIDEO) ────────────────
+  // â”€â”€â”€ BACKGROUNDS (VIDEO) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   initVideoBackground();
 
-  // ─── MENU SYSTEM ────────────────────────
+  // â”€â”€â”€ MENU SYSTEM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function renderMenuLocal() {
     engineRenderMenu(menuList, currentMenuIndex);
   }
@@ -47,7 +47,7 @@ console.log('[ENGINE] Script inicializado');
     }
   }
 
-  // ─── RENDER: HORARIO (exclusivo de la intro) ──────────────
+  // â”€â”€â”€ RENDER: HORARIO (exclusivo de la intro) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function renderSchedule() {
     const today = new Date();
     let todayIdx = today.getDay();
@@ -99,7 +99,7 @@ console.log('[ENGINE] Script inicializado');
         <div style="font-family: var(--font-title); font-size: ${titleFontSize}; font-weight: 800; color: #fff; letter-spacing: 1px; transition: all 0.3s ease; text-transform: uppercase; text-shadow: ${active ? '0 0 15px rgba(255,255,255, 0.5)' : 'none'};">
           ${DAY_NAMES[k]} <span style="font-family: var(--font-mono); font-size: ${dateFontSize}; color: ${active ? '#fff' : 'rgba(255,255,255,0.8)'};">${displayDate}</span>
         </div>
-        ${active ? '<div style="font-family: var(--font-mono); font-size: 0.9rem; background: var(--cyber-red); color: #fff; padding: 2px 10px; display: inline-block; margin-top: 4px; font-weight: bold; letter-spacing: 1px; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);">HOY</div>' : ''}
+        ${active ? '<div style="font-family: var(--font-mono); font-size: 0.9rem; background: var(--accent-blue); color: #fff; padding: 2px 10px; display: inline-block; margin-top: 4px; font-weight: bold; letter-spacing: 1px; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);">HOY</div>' : ''}
       `;
       dayRow.appendChild(dayLabel);
 
@@ -116,7 +116,7 @@ console.log('[ENGINE] Script inicializado');
         const startTimeStr = timeParts[0] ? timeParts[0].trim() : g.time;
         const endTimeStr   = timeParts[1] ? timeParts[1].trim() : '';
 
-        // Definimos el estilo de posición de la imagen de forma dinámica solo para el object-position
+        // Definimos el estilo de posiciÃ³n de la imagen de forma dinÃ¡mica solo para el object-position
         const objectPositionStyle = g.game.trim().toUpperCase() === 'DESCANSO' ? 'center 25%' : 'center';
 
         gameCard.innerHTML = `
@@ -154,7 +154,7 @@ console.log('[ENGINE] Script inicializado');
     });
   }
 
-  // ─── ROTACION DE MENU ────────────────────
+  // â”€â”€â”€ ROTACION DE MENU â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let menuTimer = null;
   function scheduleNextMenuRotation() {
     clearTimeout(menuTimer);
@@ -168,7 +168,7 @@ console.log('[ENGINE] Script inicializado');
     scheduleNextMenuRotation();
   }
 
-  // ─── DATOS (Firestore + cache) ────────────
+  // â”€â”€â”€ DATOS (Firestore + cache) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function applyData(users, streams) {
     allUsers = users;
     updateRankingHistory(users);
@@ -199,7 +199,7 @@ console.log('[ENGINE] Script inicializado');
     }
   }
 
-  // ─── INIT ────────────────────────────────
+  // â”€â”€â”€ INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   renderMenuLocal();
   renderActiveContent();
   scheduleNextMenuRotation();
