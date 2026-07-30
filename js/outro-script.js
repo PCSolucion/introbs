@@ -7,7 +7,7 @@
 
 import {
   SCHEDULE,
-  getGameImage, getGameImageSync, preloadGameImage,
+  getGameImage, getGameImageSync, preloadGameImage, parseStreamTime,
   renderPlaceholder, initAppController
 } from './engine.js';
 
@@ -39,8 +39,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
         for (const stream of dayStreams) {
           if (stream.game && stream.game.trim().toUpperCase() === 'DESCANSO') continue;
 
-          const [startStr] = stream.time.split('-');
-          const [startHour, startMin] = startStr.trim().split(':').map(Number);
+          const { startTimeStr, startHour, startMin } = parseStreamTime(stream.time);
           const streamTimeInMinutes = startHour * 60 + startMin;
 
           if (offset === 0 && streamTimeInMinutes <= currentTimeInMinutes) continue;
@@ -67,8 +66,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
           for (const stream of dayStreams) {
             if (stream.game && stream.game.trim().toUpperCase() === 'DESCANSO') continue;
 
-            const [startStr] = stream.time.split('-');
-            const [startHour, startMin] = startStr.trim().split(':').map(Number);
+            const { startHour, startMin } = parseStreamTime(stream.time);
             foundStream  = stream;
             targetDate   = new Date(checkDate);
             targetDate.setHours(startHour, startMin, 0, 0);
@@ -99,7 +97,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
     if (!stream) { renderPlaceholder(contentArea, 'SIN PROGRAMACION'); return; }
 
     const formattedDay = formatNextStreamDay(targetDate, offset);
-    const [startStr]   = stream.time.split('-');
+    const { startTimeStr } = parseStreamTime(stream.time);
 
     const container = document.createElement('div');
     container.className = 'content-view-container feed-enter';
@@ -132,7 +130,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
             ${formattedDay}
           </span>
           <span class="sch-outro-time-badge">
-            ${startStr.trim()}
+            ${startTimeStr}
           </span>
         </div>
       </div>

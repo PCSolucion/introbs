@@ -1,7 +1,7 @@
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   ENGINE.JS â€” LÃ³gica compartida entre script.js y outro-script.js
-   Contiene: helpers, cachÃ©, Firestore, vÃ­deos, menÃº, feed, renders comunes
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ═══════════════════════════════════════════════════════
+   ENGINE.JS — Lógica compartida entre script.js y outro-script.js
+   Contiene: helpers, caché, Firestore, vídeos, menú, feed, renders comunes
+   ═══════════════════════════════════════════════════════ */
 
 import { db } from './firebase.js';
 import { collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js';
@@ -10,7 +10,7 @@ import { SCHEDULE } from './schedule.js';
 
 export { SCHEDULE };
 
-// â”€â”€â”€ TÃTULOS DE NIVEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── TÍTULOS DE NIVEL ──────────────────────────────────
 export const LEVEL_TITLES = {
   1: 'CIVILIAN', 5: 'ROOKIE', 10: 'MERCENARY',
   15: 'SOLO', 20: 'NETRUNNER', 30: 'FIXER',
@@ -25,7 +25,7 @@ export function getTitle(level) {
   return `EDGE RUNNER LVL ${level}`;
 }
 
-// â”€â”€â”€ CONFIGURACIÃ“N GLOBAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── CONFIGURACIÓN GLOBAL ──────────────────────────────
 export const CONFIG = {
   backgrounds: [
     'fondos/isabela.mp4', 'fondos/bloodborne.mp4', 'fondos/ciri.mp4', 'fondos/claire.mp4',
@@ -161,7 +161,17 @@ export function formatTime(minutes) {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-// â”€â”€â”€ SISTEMA DE VÃDEOS DE FONDO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+export function parseStreamTime(timeStr) {
+  if (!timeStr) return { startTimeStr: '', endTimeStr: '', startHour: 0, startMin: 0 };
+  const parts = String(timeStr).split('-');
+  const startTimeStr = parts[0] ? parts[0].trim() : '';
+  const endTimeStr = parts[1] ? parts[1].trim() : '';
+  const [startHourStr, startMinStr] = startTimeStr.split(':');
+  const startHour = Number(startHourStr) || 0;
+  const startMin = Number(startMinStr) || 0;
+  return { startTimeStr, endTimeStr, startHour, startMin };
+}
+
 // ─── SISTEMA DE VÍDEOS DE FONDO ──────────────────────
 export function initVideoBackground() {
   const v1 = document.getElementById('bgVideo1');

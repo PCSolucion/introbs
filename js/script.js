@@ -6,7 +6,7 @@
 
 import {
   SCHEDULE, DAY_NAMES,
-  getGameImage, getGameImageSync, preloadGameImage,
+  getGameImage, getGameImageSync, preloadGameImage, parseStreamTime,
   initAppController
 } from './engine.js';
 
@@ -78,9 +78,7 @@ console.log('[INTRO] Script inicializado');
         const gameCard = document.createElement('div');
         gameCard.className = `sch-card ${active ? 'active-day' : ''}`;
 
-        const timeParts = g.time.split('-');
-        const startTimeStr = timeParts[0] ? timeParts[0].trim() : g.time;
-        const endTimeStr   = timeParts[1] ? timeParts[1].trim() : '';
+        const { startTimeStr, endTimeStr } = parseStreamTime(g.time);
 
         const syncUrl = getGameImageSync(g.game);
         const objectPositionStyle = g.game.trim().toUpperCase() === 'DESCANSO' ? 'center 25%' : 'center';
