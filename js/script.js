@@ -1,12 +1,12 @@
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   STREAM INTRO â€” script.js
+﻿/* ═══════════════════════════════════════════════════════
+   CYBERPUNK 2077 STREAM INTRO — script.js
    Logica exclusiva de la INTRO: renderSchedule() con vista
    de semana completa. El resto viene de engine.js
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ═══════════════════════════════════════════════════════ */
 
 import {
   CONFIG, SCHEDULE, DAY_NAMES, MENU_ITEMS,
-  getTitle, getGameImage, preloadGameImage, formatDisplayName,
+  getTitle, getGameImage, getGameImageSync, preloadGameImage, formatDisplayName,
   initVideoBackground, renderMenu as engineRenderMenu,
   renderFeed, renderRecentStreams, renderPlaceholder,
   buildFeedQueue, isCacheValid, saveToCache, loadFromCache,
@@ -19,19 +19,19 @@ console.log('[ENGINE] Script inicializado');
   'use strict';
   console.log('[ENGINE] IIFE en ejecucion');
 
-  // â”€â”€â”€ DOM REFS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── DOM REFS ───────────────────────────
   const menuList   = document.getElementById('menuList');
   const contentArea = document.getElementById('contentArea');
 
-  // â”€â”€â”€ STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── STATE ──────────────────────────────
   let currentMenuIndex = 0;
   let allUsers = [];
   let recentStreams = [];
 
-  // â”€â”€â”€ BACKGROUNDS (VIDEO) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── BACKGROUNDS (VIDEO) ────────────────
   initVideoBackground();
 
-  // â”€â”€â”€ MENU SYSTEM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── MENU SYSTEM ────────────────────────
   function renderMenuLocal() {
     engineRenderMenu(menuList, currentMenuIndex);
   }
@@ -47,7 +47,7 @@ console.log('[ENGINE] Script inicializado');
     }
   }
 
-  // â”€â”€â”€ RENDER: HORARIO (exclusivo de la intro) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── RENDER: HORARIO (exclusivo de la intro) ──────────────
   function renderSchedule() {
     const today = new Date();
     let todayIdx = today.getDay();
@@ -99,7 +99,7 @@ console.log('[ENGINE] Script inicializado');
         <div style="font-family: var(--font-title); font-size: ${titleFontSize}; font-weight: 800; color: #fff; letter-spacing: 1px; transition: all 0.3s ease; text-transform: uppercase; text-shadow: ${active ? '0 0 15px rgba(255,255,255, 0.5)' : 'none'};">
           ${DAY_NAMES[k]} <span style="font-family: var(--font-mono); font-size: ${dateFontSize}; color: ${active ? '#fff' : 'rgba(255,255,255,0.8)'};">${displayDate}</span>
         </div>
-        ${active ? '<div style="font-family: var(--font-mono); font-size: 0.9rem; background: var(--accent-blue); color: #fff; padding: 2px 10px; display: inline-block; margin-top: 4px; font-weight: bold; letter-spacing: 1px; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);">HOY</div>' : ''}
+        ${active ? '<div style="font-family: var(--font-mono); font-size: 0.9rem; background: var(--cyber-red); color: #fff; padding: 2px 10px; display: inline-block; margin-top: 4px; font-weight: bold; letter-spacing: 1px; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);">HOY</div>' : ''}
       `;
       dayRow.appendChild(dayLabel);
 
@@ -116,11 +116,11 @@ console.log('[ENGINE] Script inicializado');
         const startTimeStr = timeParts[0] ? timeParts[0].trim() : g.time;
         const endTimeStr   = timeParts[1] ? timeParts[1].trim() : '';
 
-        // Definimos el estilo de posiciÃ³n de la imagen de forma dinÃ¡mica solo para el object-position
+        const syncUrl = getGameImageSync(g.game);
         const objectPositionStyle = g.game.trim().toUpperCase() === 'DESCANSO' ? 'center 25%' : 'center';
 
         gameCard.innerHTML = `
-          <img class="sch-card-img sch-new-img" data-game="${g.game}" data-active="${active}" src="" style="object-position: ${objectPositionStyle};">
+          <img class="sch-card-img sch-new-img" data-game="${g.game}" data-active="${active}" src="${syncUrl}" style="object-position: ${objectPositionStyle}; ${syncUrl ? 'opacity: 1; transform: scale(1.08);' : ''}">
           <div class="sch-card-overlay"></div>
           <div class="sch-card-content">
             <div class="sch-card-title">${g.game}</div>
@@ -131,6 +131,19 @@ console.log('[ENGINE] Script inicializado');
           </div>
         `;
         gamesCol.appendChild(gameCard);
+
+        if (!syncUrl) {
+          const img = gameCard.querySelector('.sch-card-img');
+          getGameImage(g.game).then(url => {
+            if (url) {
+              img.src = url;
+              setTimeout(() => {
+                img.style.opacity = '1';
+                img.style.transform = 'scale(1.08)';
+              }, 50);
+            }
+          });
+        }
       });
 
       dayRow.appendChild(gamesCol);
@@ -138,23 +151,9 @@ console.log('[ENGINE] Script inicializado');
     });
 
     contentArea.appendChild(scheduleContainer);
-
-    // Carga de imagenes async
-    scheduleContainer.querySelectorAll('.sch-new-img').forEach(img => {
-      const gameName = img.getAttribute('data-game');
-      getGameImage(gameName).then(url => {
-        if (url) {
-          img.src = url;
-          setTimeout(() => {
-            img.style.opacity = '1';
-            img.style.transform = 'scale(1.08)';
-          }, 50);
-        }
-      });
-    });
   }
 
-  // â”€â”€â”€ ROTACION DE MENU â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── ROTACION DE MENU ────────────────────
   let menuTimer = null;
   function scheduleNextMenuRotation() {
     clearTimeout(menuTimer);
@@ -168,7 +167,7 @@ console.log('[ENGINE] Script inicializado');
     scheduleNextMenuRotation();
   }
 
-  // â”€â”€â”€ DATOS (Firestore + cache) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── DATOS (Firestore + cache) ────────────
   function applyData(users, streams) {
     allUsers = users;
     updateRankingHistory(users);

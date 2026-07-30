@@ -1,13 +1,13 @@
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   STREAM OUTRO â€” outro-script.js
+﻿/* ═══════════════════════════════════════════════════════
+   CYBERPUNK 2077 STREAM OUTRO — outro-script.js
    Logica exclusiva del OUTRO: busqueda del siguiente
    stream + renderSchedule() con countdown. El resto
    viene de engine.js
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ═══════════════════════════════════════════════════════ */
 
 import {
   CONFIG, SCHEDULE, MENU_ITEMS,
-  getGameImage, preloadGameImage, formatDisplayName,
+  getGameImage, getGameImageSync, preloadGameImage, formatDisplayName,
   initVideoBackground, renderMenu as engineRenderMenu,
   renderFeed, renderRecentStreams, renderPlaceholder,
   buildFeedQueue, isCacheValid, saveToCache, loadFromCache,
@@ -20,20 +20,20 @@ console.log('[OUTRO ENGINE] Script inicializado');
   'use strict';
   console.log('[OUTRO ENGINE] IIFE en ejecucion');
 
-  // â”€â”€â”€ DOM REFS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── DOM REFS ───────────────────────────
   const menuList    = document.getElementById('menuList');
   const contentArea = document.getElementById('contentArea');
 
-  // â”€â”€â”€ STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── STATE ──────────────────────────────
   let currentMenuIndex = 0;
   let allUsers = [];
   let recentStreams = [];
   let countdownInterval = null;
 
-  // â”€â”€â”€ BACKGROUNDS (VIDEO) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── BACKGROUNDS (VIDEO) ────────────────
   initVideoBackground();
 
-  // â”€â”€â”€ MENU SYSTEM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── MENU SYSTEM ────────────────────────
   function renderMenuLocal() {
     engineRenderMenu(menuList, currentMenuIndex);
   }
@@ -53,12 +53,11 @@ console.log('[OUTRO ENGINE] Script inicializado');
     }
   }
 
-  // â”€â”€â”€ LOGICA DE BUSQUEDA DEL SIGUIENTE STREAM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── LOGICA DE BUSQUEDA DEL SIGUIENTE STREAM ─────────────
   const dayKeys = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
 
   function findNextStream() {
     const now = new Date();
-    const currentDayIndex = now.getDay() === 0 ? 7 : now.getDay();
     const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
 
     let foundStream = null;
@@ -74,7 +73,6 @@ console.log('[OUTRO ENGINE] Script inicializado');
 
       if (dayStreams && dayStreams.length > 0) {
         for (const stream of dayStreams) {
-          // Ignorar días o franjas marcadas como DESCANSO
           if (stream.game && stream.game.trim().toUpperCase() === 'DESCANSO') continue;
 
           const [startStr] = stream.time.split('-');
@@ -93,7 +91,6 @@ console.log('[OUTRO ENGINE] Script inicializado');
       if (foundStream) break;
     }
 
-    // Fallback: buscar en la semana siguiente si no se encontró directo activo en los 7 días inmediatos
     if (!foundStream) {
       for (let offset = 7; offset < 14; offset++) {
         const checkDate = new Date(now);
@@ -130,7 +127,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
     return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]}`;
   }
 
-  // â”€â”€â”€ RENDER: HORARIO (exclusivo del outro â€” muestra el siguiente stream) â”€â”€
+  // ─── RENDER: HORARIO (exclusivo del outro — muestra el siguiente stream) ──
   function renderSchedule() {
     if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
 
@@ -149,21 +146,23 @@ console.log('[OUTRO ENGINE] Script inicializado');
     const headerEl = document.createElement('div');
     headerEl.style.fontFamily    = 'var(--font-mono)';
     headerEl.style.fontSize      = '1.3rem';
-    headerEl.style.color         = 'var(--accent-blue)';
+    headerEl.style.color         = 'var(--cyber-red)';
     headerEl.style.textShadow    = 'var(--glow-red)';
     headerEl.style.letterSpacing = '3px';
     headerEl.style.textTransform = 'uppercase';
     headerEl.textContent = '// ENLACE_NEURAL: SIGUIENTE TRANSMISION';
     container.appendChild(headerEl);
 
+    // Obtener la URL sincrónicamente (sin retardo)
+    const syncUrl = getGameImageSync(stream.game);
+    const objectPositionStyle = stream.game.trim().toUpperCase() === 'DESCANSO' ? 'center 25%' : 'center';
+
     // Caja de juego
     const gameDisplay = document.createElement('div');
     gameDisplay.className = 'sch-card active-day outro-version';
 
-    const objectPositionStyle = stream.game.trim().toUpperCase() === 'DESCANSO' ? 'center 25%' : 'center';
-
     gameDisplay.innerHTML = `
-      <img class="sch-card-img sch-new-img" data-game="${stream.game}" src="" style="object-position: ${objectPositionStyle};">
+      <img class="sch-card-img sch-new-img" data-game="${stream.game}" src="${syncUrl}" style="object-position: ${objectPositionStyle}; ${syncUrl ? 'opacity: 0.55; transform: scale(1.06);' : ''}">
       <div class="sch-card-overlay"></div>
       <div class="sch-card-content">
         <h2 style="font-family: var(--font-title); font-size: 2.6rem; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 1px; text-shadow: 2px 2px 6px rgba(0,0,0,0.9); line-height: 1.1; margin-bottom: 12px; max-width: 65%;">
@@ -173,7 +172,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
           <span style="font-family: var(--font-ui); font-size: 1.6rem; font-weight: 700; color: #fff; text-shadow: 1px 1px 4px rgba(0,0,0,0.9); text-transform: uppercase; letter-spacing: 1px;">
             ${formattedDay}
           </span>
-          <span style="font-family: var(--font-mono); font-size: 2.1rem; font-weight: bold; color: var(--accent-blue); background: rgba(0,0,0,0.75); border: 1px solid var(--accent-blue); padding: 5px 16px; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); box-shadow: var(--glow-red);">
+          <span style="font-family: var(--font-mono); font-size: 2.1rem; font-weight: bold; color: var(--cyber-red); background: rgba(0,0,0,0.75); border: 1px solid var(--cyber-red); padding: 5px 16px; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); box-shadow: var(--glow-red);">
             ${startStr.trim()}
           </span>
         </div>
@@ -181,15 +180,17 @@ console.log('[OUTRO ENGINE] Script inicializado');
     `;
     container.appendChild(gameDisplay);
 
-    // Cargar imagen de RAWG API
-    const img = gameDisplay.querySelector('.sch-card-img');
-    getGameImage(stream.game).then(url => {
-      if (url) {
-        img.src = url;
-        img.style.opacity = '0.55';
-        img.style.transform = 'scale(1.06)';
-      }
-    });
+    // Fallback asíncrono si la imagen no estaba en la caché sincrónica inicial
+    if (!syncUrl) {
+      const img = gameDisplay.querySelector('.sch-card-img');
+      getGameImage(stream.game).then(url => {
+        if (url) {
+          img.src = url;
+          img.style.opacity = '0.55';
+          img.style.transform = 'scale(1.06)';
+        }
+      });
+    }
 
     // Caja countdown
     const countdownBox = document.createElement('div');
@@ -197,16 +198,16 @@ console.log('[OUTRO ENGINE] Script inicializado');
     countdownBox.style.flexDirection  = 'column';
     countdownBox.style.alignItems     = 'center';
     countdownBox.style.padding        = '20px';
-    countdownBox.style.background     = 'rgba(var(--accent-blue-rgb), 0.08)';
-    countdownBox.style.border         = '1px solid rgba(var(--accent-blue-rgb), 0.2)';
-    countdownBox.style.borderLeft     = '4px solid var(--accent-blue)';
+    countdownBox.style.background     = 'rgba(var(--cyber-red-rgb), 0.08)';
+    countdownBox.style.border         = '1px solid rgba(var(--cyber-red-rgb), 0.2)';
+    countdownBox.style.borderLeft     = '4px solid var(--cyber-red)';
     countdownBox.style.clipPath       = 'polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)';
     countdownBox.style.boxShadow      = '0 5px 15px rgba(0,0,0,0.2)';
     countdownBox.innerHTML = `
       <span style="font-family: var(--font-mono); font-size: 1rem; color: rgba(255,255,255,0.4); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 5px;">
         TIEMPO PARA EL ENLACE
       </span>
-      <div id="countdownClock" style="font-family: var(--font-mono); font-size: 3.2rem; font-weight: bold; color: #fff; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255,255,255, 0.2), 0 0 10px rgba(var(--accent-blue-rgb), 0.3);">
+      <div id="countdownClock" style="font-family: var(--font-mono); font-size: 3.2rem; font-weight: bold; color: #fff; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255,255,255, 0.2), 0 0 10px rgba(var(--cyber-red-rgb), 0.3);">
         00d : 00h : 00m : 00s
       </div>
     `;
@@ -226,7 +227,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
     const logIndicator = document.createElement('span');
     logIndicator.style.width           = '8px';
     logIndicator.style.height          = '8px';
-    logIndicator.style.backgroundColor = 'var(--accent-blue)';
+    logIndicator.style.backgroundColor = 'var(--cyber-red)';
     logIndicator.style.boxShadow       = 'var(--glow-red)';
     logIndicator.style.borderRadius    = '50%';
     logIndicator.style.animation       = 'logPulse 1.5s infinite ease-in-out';
@@ -269,7 +270,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
     countdownInterval = setInterval(updateCountdown, 1000);
   }
 
-  // â”€â”€â”€ ROTACION DE MENU â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── ROTACION DE MENU ────────────────────
   let menuTimer = null;
   function scheduleNextMenuRotation() {
     clearTimeout(menuTimer);
@@ -283,7 +284,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
     scheduleNextMenuRotation();
   }
 
-  // â”€â”€â”€ DATOS (Firestore + cache) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── DATOS (Firestore + cache) ────────────
   function applyData(users, streams) {
     allUsers = users;
     updateRankingHistory(users);

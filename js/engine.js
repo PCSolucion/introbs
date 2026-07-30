@@ -66,7 +66,7 @@ export async function preloadGameImage(gameName) {
   }
 }
 
-export async function getGameImage(gameName) {
+export function getGameImageSync(gameName) {
   if (!gameName) return '';
   const cleanName = gameName.trim();
   const upper = cleanName.toUpperCase();
@@ -74,23 +74,31 @@ export async function getGameImage(gameName) {
   if (upper === 'DESCANSO') return 'fondos/descanso.png';
   if (upper === 'INFORMATICA') return 'fondos/informatica-bg.jpg';
 
-  // 1. Memoria RAM
   if (gameImageCache[cleanName]) return gameImageCache[cleanName];
 
-  // 2. LocalStorage (Persistente en el navegador u OBS)
   const diskCache = getRawgCache();
   if (diskCache[cleanName]) {
     gameImageCache[cleanName] = diskCache[cleanName];
     return diskCache[cleanName];
   }
 
-  // 3. Si no existe para este juego específico, consultar RAWG API una sola vez
+  return '';
+}
+
+export async function getGameImage(gameName) {
+  if (!gameName) return '';
+  const syncUrl = getGameImageSync(gameName);
+  if (syncUrl) return syncUrl;
+
+  const cleanName = gameName.trim();
+
   try {
     const res = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
     const data = await res.json();
     if (data.results && data.results.length > 0 && data.results[0].background_image) {
       const imgUrl = data.results[0].background_image;
       gameImageCache[cleanName] = imgUrl;
+      const diskCache = getRawgCache();
       diskCache[cleanName] = imgUrl;
       saveRawgCache(diskCache);
       return imgUrl;
