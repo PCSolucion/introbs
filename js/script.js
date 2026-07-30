@@ -1,54 +1,22 @@
 /* ═══════════════════════════════════════════════════════
    CYBERPUNK 2077 STREAM INTRO — script.js
-   Logica exclusiva de la INTRO: renderSchedule() con vista
+   Lógica exclusiva de la INTRO: renderSchedule() con vista
    de semana completa. El resto viene de engine.js
    ═══════════════════════════════════════════════════════ */
 
 import {
-  CONFIG, SCHEDULE, DAY_NAMES, MENU_ITEMS,
-  getTitle, getGameImage, getGameImageSync, preloadGameImage, formatDisplayName,
-  initVideoBackground, renderMenu as engineRenderMenu,
-  renderFeed, renderRecentStreams, renderPlaceholder,
-  buildFeedQueue, isCacheValid, saveToCache, loadFromCache,
-  fetchFromFirestore, updateRankingHistory,
+  SCHEDULE, DAY_NAMES,
+  getGameImage, getGameImageSync, preloadGameImage,
+  initAppController
 } from './engine.js';
 
-console.log('[ENGINE] Script inicializado');
+console.log('[INTRO] Script inicializado');
 
 (function () {
   'use strict';
-  console.log('[ENGINE] IIFE en ejecucion');
-
-  // ─── DOM REFS ───────────────────────────
-  const menuList   = document.getElementById('menuList');
-  const contentArea = document.getElementById('contentArea');
-
-  // ─── STATE ──────────────────────────────
-  let currentMenuIndex = 0;
-  let allUsers = [];
-  let recentStreams = [];
-
-  // ─── BACKGROUNDS (VIDEO) ────────────────
-  initVideoBackground();
-
-  // ─── MENU SYSTEM ────────────────────────
-  function renderMenuLocal() {
-    engineRenderMenu(menuList, currentMenuIndex);
-  }
-
-  function renderActiveContent() {
-    contentArea.innerHTML = '';
-    const activeItem = MENU_ITEMS[currentMenuIndex];
-    switch (activeItem.id) {
-      case 'horario':  renderSchedule(); break;
-      case 'topcanal': renderFeed(contentArea, allUsers); break;
-      case 'item1':    renderRecentStreams(contentArea, recentStreams); break;
-      default:         renderPlaceholder(contentArea, activeItem.title);
-    }
-  }
 
   // ─── RENDER: HORARIO (exclusivo de la intro) ──────────────
-  function renderSchedule() {
+  function renderSchedule(contentArea) {
     const today = new Date();
     let todayIdx = today.getDay();
     if (todayIdx === 0) todayIdx = 7;
@@ -153,59 +121,13 @@ console.log('[ENGINE] Script inicializado');
     contentArea.appendChild(scheduleContainer);
   }
 
-  // ─── ROTACION DE MENU ────────────────────
-  let menuTimer = null;
-  function scheduleNextMenuRotation() {
-    clearTimeout(menuTimer);
-    menuTimer = setTimeout(rotateMenu, CONFIG.menuInterval);
-  }
-
-  function rotateMenu() {
-    currentMenuIndex = (currentMenuIndex + 1) % MENU_ITEMS.length;
-    renderMenuLocal();
-    renderActiveContent();
-    scheduleNextMenuRotation();
-  }
-
-  // ─── DATOS (Firestore + cache) ────────────
-  function applyData(users, streams) {
-    allUsers = users;
-    updateRankingHistory(users);
-    recentStreams = streams;
-    renderActiveContent();
-  }
-
-  async function loadUsers() {
-    try {
-      if (isCacheValid()) {
-        console.log('[CACHE] Usando datos en cache (no se contacta Firebase)');
-        const { users, streams } = loadFromCache();
-        if (users.length > 0) { applyData(users, streams); return; }
-        console.log('[CACHE] Cache vacia, forzando descarga...');
-      }
-      const { users, streams } = await fetchFromFirestore();
-      saveToCache(users, streams);
-      applyData(users, streams);
-    } catch (err) {
-      console.error('[INTRO] Error de Firestore:', err);
-      const { users, streams } = loadFromCache();
-      if (users.length > 0) {
-        console.log('[CACHE] Usando cache expirada como fallback');
-        applyData(users, streams);
-      } else {
-        renderPlaceholder(contentArea, 'ERROR DE CONEXION');
-      }
-    }
-  }
-
   // ─── INIT ─────────────────────────────────────────
   Object.values(SCHEDULE).flat().forEach(g => {
     if (g && g.game) preloadGameImage(g.game);
   });
 
-  renderMenuLocal();
-  renderActiveContent();
-  scheduleNextMenuRotation();
-  loadUsers();
+  initAppController({
+    renderScheduleCustom: (contentArea) => renderSchedule(contentArea)
+  });
 
 })();

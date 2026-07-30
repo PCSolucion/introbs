@@ -1,61 +1,25 @@
 /* ═══════════════════════════════════════════════════════
    CYBERPUNK 2077 STREAM OUTRO — outro-script.js
-   Logica exclusiva del OUTRO: busqueda del siguiente
+   Lógica exclusiva del OUTRO: búsqueda del siguiente
    stream + renderSchedule() con countdown. El resto
    viene de engine.js
    ═══════════════════════════════════════════════════════ */
 
 import {
-  CONFIG, SCHEDULE, MENU_ITEMS,
-  getGameImage, getGameImageSync, preloadGameImage, formatDisplayName,
-  initVideoBackground, renderMenu as engineRenderMenu,
-  renderFeed, renderRecentStreams, renderPlaceholder,
-  buildFeedQueue, isCacheValid, saveToCache, loadFromCache,
-  fetchFromFirestore, updateRankingHistory,
+  SCHEDULE,
+  getGameImage, getGameImageSync, preloadGameImage,
+  renderPlaceholder, initAppController
 } from './engine.js';
 
 console.log('[OUTRO ENGINE] Script inicializado');
 
 (function () {
   'use strict';
-  console.log('[OUTRO ENGINE] IIFE en ejecucion');
 
-  // ─── DOM REFS ───────────────────────────
-  const menuList    = document.getElementById('menuList');
-  const contentArea = document.getElementById('contentArea');
-
-  // ─── STATE ──────────────────────────────
-  let currentMenuIndex = 0;
-  let allUsers = [];
-  let recentStreams = [];
   let countdownInterval = null;
-
-  // ─── BACKGROUNDS (VIDEO) ────────────────
-  initVideoBackground();
-
-  // ─── MENU SYSTEM ────────────────────────
-  function renderMenuLocal() {
-    engineRenderMenu(menuList, currentMenuIndex);
-  }
-
-  function renderActiveContent() {
-    if (countdownInterval) {
-      clearInterval(countdownInterval);
-      countdownInterval = null;
-    }
-    contentArea.innerHTML = '';
-    const activeItem = MENU_ITEMS[currentMenuIndex];
-    switch (activeItem.id) {
-      case 'horario':  renderSchedule(); break;
-      case 'topcanal': renderFeed(contentArea, allUsers); break;
-      case 'item1':    renderRecentStreams(contentArea, recentStreams); break;
-      default:         renderPlaceholder(contentArea, activeItem.title);
-    }
-  }
-
-  // ─── LOGICA DE BUSQUEDA DEL SIGUIENTE STREAM ─────────────
   const dayKeys = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
 
+  // ─── LOGICA DE BUSQUEDA DEL SIGUIENTE STREAM ─────────────
   function findNextStream() {
     const now = new Date();
     const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
@@ -128,7 +92,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
   }
 
   // ─── RENDER: HORARIO (exclusivo del outro — muestra el siguiente stream) ──
-  function renderSchedule() {
+  function renderScheduleOutro(contentArea) {
     if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
 
     const { stream, date: targetDate, offset } = findNextStream();
@@ -270,57 +234,20 @@ console.log('[OUTRO ENGINE] Script inicializado');
     countdownInterval = setInterval(updateCountdown, 1000);
   }
 
-  // ─── ROTACION DE MENU ────────────────────
-  let menuTimer = null;
-  function scheduleNextMenuRotation() {
-    clearTimeout(menuTimer);
-    menuTimer = setTimeout(rotateMenu, CONFIG.menuInterval);
-  }
-
-  function rotateMenu() {
-    currentMenuIndex = (currentMenuIndex + 1) % MENU_ITEMS.length;
-    renderMenuLocal();
-    renderActiveContent();
-    scheduleNextMenuRotation();
-  }
-
-  // ─── DATOS (Firestore + cache) ────────────
-  function applyData(users, streams) {
-    allUsers = users;
-    updateRankingHistory(users);
-    recentStreams = streams;
-    renderActiveContent();
-  }
-
-  async function loadUsers() {
-    try {
-      if (isCacheValid()) {
-        const { users, streams } = loadFromCache();
-        if (users.length > 0) { applyData(users, streams); return; }
-      }
-      const { users, streams } = await fetchFromFirestore();
-      saveToCache(users, streams);
-      applyData(users, streams);
-    } catch (err) {
-      console.error('[OUTRO] Error loading data:', err);
-      const { users, streams } = loadFromCache();
-      if (users.length > 0) {
-        applyData(users, streams);
-      } else {
-        renderPlaceholder(contentArea, 'ERROR DE CONEXION');
-      }
-    }
-  }
-
   // ─── INIT ─────────────────────────────────────────
   const nextStreamInfo = findNextStream();
   if (nextStreamInfo && nextStreamInfo.stream) {
     preloadGameImage(nextStreamInfo.stream.game);
   }
 
-  renderMenuLocal();
-  renderActiveContent();
-  scheduleNextMenuRotation();
-  loadUsers();
+  initAppController({
+    onBeforeRenderContent: () => {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+    },
+    renderScheduleCustom: (contentArea) => renderScheduleOutro(contentArea)
+  });
 
 })();

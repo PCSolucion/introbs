@@ -634,3 +634,97 @@ export async function fetchFromFirestore() {
   console.log(`[FIREBASE] ${streams.length} streams descargados`);
   return { users, streams };
 }
+
+// ─── CONTROLADOR PRINCIPAL DE APLICACIÓN ──────────────────
+export function initAppController({ renderScheduleCustom, onBeforeRenderContent }) {
+  console.log('[ENGINE] Inicializando controlador principal');
+
+  const menuList = document.getElementById('menuList');
+  const contentArea = document.getElementById('contentArea');
+
+  let currentMenuIndex = 0;
+  let allUsers = [];
+  let recentStreams = [];
+  let menuTimer = null;
+
+  // Iniciar vídeo de fondo
+  initVideoBackground();
+
+  function renderMenuLocal() {
+    renderMenu(menuList, currentMenuIndex);
+  }
+
+  function renderActiveContent() {
+    if (typeof onBeforeRenderContent === 'function') {
+      onBeforeRenderContent();
+    }
+    contentArea.innerHTML = '';
+    const activeItem = MENU_ITEMS[currentMenuIndex];
+    switch (activeItem.id) {
+      case 'horario':
+        if (typeof renderScheduleCustom === 'function') {
+          renderScheduleCustom(contentArea, { allUsers, recentStreams });
+        }
+        break;
+      case 'topcanal':
+        renderFeed(contentArea, allUsers);
+        break;
+      case 'item1':
+        renderRecentStreams(contentArea, recentStreams);
+        break;
+      default:
+        renderPlaceholder(contentArea, activeItem.title);
+    }
+  }
+
+  function scheduleNextMenuRotation() {
+    clearTimeout(menuTimer);
+    menuTimer = setTimeout(rotateMenu, CONFIG.menuInterval);
+  }
+
+  function rotateMenu() {
+    currentMenuIndex = (currentMenuIndex + 1) % MENU_ITEMS.length;
+    renderMenuLocal();
+    renderActiveContent();
+    scheduleNextMenuRotation();
+  }
+
+  function applyData(users, streams) {
+    allUsers = users;
+    updateRankingHistory(users);
+    recentStreams = streams;
+    renderActiveContent();
+  }
+
+  async function loadUsers() {
+    try {
+      if (isCacheValid()) {
+        console.log('[CACHE] Usando datos en caché');
+        const { users, streams } = loadFromCache();
+        if (users.length > 0) {
+          applyData(users, streams);
+          return;
+        }
+        console.log('[CACHE] Caché vacía, forzando descarga...');
+      }
+      const { users, streams } = await fetchFromFirestore();
+      saveToCache(users, streams);
+      applyData(users, streams);
+    } catch (err) {
+      console.error('[ENGINE] Error de Firestore:', err);
+      const { users, streams } = loadFromCache();
+      if (users.length > 0) {
+        console.log('[CACHE] Usando caché expirada como fallback');
+        applyData(users, streams);
+      } else {
+        renderPlaceholder(contentArea, 'ERROR DE CONEXION');
+      }
+    }
+  }
+
+  renderMenuLocal();
+  renderActiveContent();
+  scheduleNextMenuRotation();
+  loadUsers();
+}
+
