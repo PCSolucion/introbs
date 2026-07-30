@@ -130,7 +130,12 @@ export const DAY_NAMES = {
   jueves: 'JUEVES', viernes: 'VIERNES',
 };
 
-// â”€â”€â”€ HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── HELPERS ─────────────────────────────────────────
+export function getUserId(u) {
+  if (!u) return '';
+  return String(u._id || u.displayName || 'unknown').toLowerCase().trim();
+}
+
 export function formatDisplayName(u) {
   let name = (u.displayName || u._id || 'UNKNOWN').toUpperCase();
   if (name === 'C_H_A_N_D_A_L_F') return 'CHANDALF';
@@ -270,7 +275,7 @@ export function renderFeed(contentArea, allUsers) {
     const lvl = u.level || 1;
     const title = getTitle(lvl);
 
-    const currentUserId = u._id || u.displayName;
+    const currentUserId = getUserId(u);
     const currentRank = i + 1;
     const prevRankIndex = prevRankingArray.indexOf(currentUserId);
 
@@ -285,7 +290,7 @@ export function renderFeed(contentArea, allUsers) {
       } else if (diff < 0) {
         changeHTML = `<span class="rank-change-indicator rank-down">&#9660; ${Math.abs(diff)}</span>`;
       } else {
-        changeHTML = `<span class="rank-change-indicator rank-equal">&#9642;</span>`;
+        changeHTML = `<span class="rank-change-indicator rank-equal">EQ</span>`;
       }
     }
 
@@ -562,13 +567,13 @@ export function processStreamsData(data) {
 
 // â”€â”€â”€ RANKING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function getRankedUserIds(users) {
-  const filtered = users.filter(u => (u.displayName || u._id || '').toLowerCase() !== 'liiukiin');
+  const filtered = users.filter(u => getUserId(u) !== 'liiukiin');
   const sorted = [...filtered].sort((a, b) => {
     const lvlDiff = (b.level || 1) - (a.level || 1);
     if (lvlDiff !== 0) return lvlDiff;
     return (b.xp || 0) - (a.xp || 0);
   });
-  return sorted.map(u => u._id || u.displayName);
+  return sorted.map(u => getUserId(u));
 }
 
 export function updateRankingHistory(users) {
