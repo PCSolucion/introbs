@@ -7,7 +7,7 @@
 
 import {
   CONFIG, SCHEDULE, MENU_ITEMS,
-  getGameImage, formatDisplayName,
+  getGameImage, preloadGameImage, formatDisplayName,
   initVideoBackground, renderMenu as engineRenderMenu,
   renderFeed, renderRecentStreams, renderPlaceholder,
   buildFeedQueue, isCacheValid, saveToCache, loadFromCache,
@@ -311,7 +311,12 @@ console.log('[OUTRO ENGINE] Script inicializado');
     }
   }
 
-  // â”€â”€â”€ INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── INIT ─────────────────────────────────────────
+  const nextStreamInfo = findNextStream();
+  if (nextStreamInfo && nextStreamInfo.stream) {
+    preloadGameImage(nextStreamInfo.stream.game);
+  }
+
   renderMenuLocal();
   renderActiveContent();
   scheduleNextMenuRotation();

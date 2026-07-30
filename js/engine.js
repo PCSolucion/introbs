@@ -40,8 +40,17 @@ export const CONFIG = {
   countdownMinutes: 5,
 };
 
-// â”€â”€â”€ CACHÃ‰ DE IMÃGENES DE JUEGOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€â”€ CACHÃ‰ DE IMÃ GENES DE JUEGOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const gameImageCache = {};
+
+export async function preloadGameImage(gameName) {
+  if (!gameName) return;
+  const url = await getGameImage(gameName);
+  if (url) {
+    const img = new Image();
+    img.src = url; // Precarga silenciosa en la memoria/búfer del navegador
+  }
+}
 
 export async function getGameImage(gameName) {
   if (!gameName) return '';

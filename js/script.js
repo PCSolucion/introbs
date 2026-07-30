@@ -1,4 +1,4 @@
-﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    STREAM INTRO â€” script.js
    Logica exclusiva de la INTRO: renderSchedule() con vista
    de semana completa. El resto viene de engine.js
@@ -6,7 +6,7 @@
 
 import {
   CONFIG, SCHEDULE, DAY_NAMES, MENU_ITEMS,
-  getTitle, getGameImage, formatDisplayName,
+  getTitle, getGameImage, preloadGameImage, formatDisplayName,
   initVideoBackground, renderMenu as engineRenderMenu,
   renderFeed, renderRecentStreams, renderPlaceholder,
   buildFeedQueue, isCacheValid, saveToCache, loadFromCache,
@@ -199,7 +199,11 @@ console.log('[ENGINE] Script inicializado');
     }
   }
 
-  // â”€â”€â”€ INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── INIT ─────────────────────────────────────────
+  Object.values(SCHEDULE).flat().forEach(g => {
+    if (g && g.game) preloadGameImage(g.game);
+  });
+
   renderMenuLocal();
   renderActiveContent();
   scheduleNextMenuRotation();
