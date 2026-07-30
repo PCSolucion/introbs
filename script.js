@@ -202,9 +202,9 @@ console.log('[ENGINE] Script inicializado');
   }
 
   // ─── INIT ────────────────────────────────
-  loadUsers();
   renderMenuLocal();
   renderActiveContent();
   scheduleNextMenuRotation();
+  loadUsers();
 
 })();

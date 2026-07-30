@@ -307,9 +307,9 @@ console.log('[OUTRO ENGINE] Script inicializado');
   }
 
   // ─── INIT ────────────────────────────────
-  loadUsers();
   renderMenuLocal();
   renderActiveContent();
   scheduleNextMenuRotation();
+  loadUsers();
 
 })();
