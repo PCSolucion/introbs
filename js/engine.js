@@ -40,6 +40,7 @@ export const CONFIG = {
   countdownMinutes: 5,
 };
 
+const gameImageCache = {};
 const RAWG_CACHE_KEY = 'introbs_rawg_image_cache_v1';
 
 function getRawgCache() {
