@@ -575,7 +575,7 @@ export function processStreamsData(data) {
   return result;
 }
 
-// â”€â”€â”€ RANKING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── RANKING ─────────────────────────────────────────
 export function getRankedUserIds(users) {
   const filtered = users.filter(u => getUserId(u) !== 'liiukiin');
   const sorted = [...filtered].sort((a, b) => {
@@ -592,16 +592,8 @@ export function updateRankingHistory(users) {
     let storedCurr = localStorage.getItem('introbs_curr_ranking');
 
     if (!storedCurr) {
-      const initialCurr = currentRankedIds;
-      const initialPrev = [...initialCurr];
-      if (initialPrev.length >= 4) {
-        [initialPrev[0], initialPrev[1]] = [initialPrev[1], initialPrev[0]];
-        if (initialPrev.length >= 6) {
-          [initialPrev[3], initialPrev[4]] = [initialPrev[4], initialPrev[3]];
-        }
-      }
-      localStorage.setItem('introbs_curr_ranking', JSON.stringify(initialCurr));
-      localStorage.setItem('introbs_prev_ranking', JSON.stringify(initialPrev));
+      localStorage.setItem('introbs_curr_ranking', JSON.stringify(currentRankedIds));
+      localStorage.setItem('introbs_prev_ranking', JSON.stringify(currentRankedIds));
     } else {
       const parsedCurr = JSON.parse(storedCurr);
       const isDifferent = parsedCurr.length !== currentRankedIds.length ||
@@ -616,22 +608,13 @@ export function updateRankingHistory(users) {
   }
 }
 
-// â”€â”€â”€ FIRESTORE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── FIRESTORE ───────────────────────────────────────
 export async function fetchFromFirestore() {
   console.log('[FIREBASE] Descargando datos frescos de Firestore...');
   const userSnapshot = await getDocs(collection(db, 'users'));
   const users = [];
   userSnapshot.forEach(d => { const data = d.data(); data._id = d.id; users.push(data); });
   console.log(`[FIREBASE] ${users.length} usuarios descargados`);
-
-  // Log de depuracion: muestra campos del primer usuario con meses de sub
-  const firstSub = users.find(u => Object.keys(u).some(k => /month|sub|tenure/i.test(k)));
-  if (firstSub) {
-    console.log('[SUB DEBUG] Campos del primer usuario con sub:', Object.keys(firstSub));
-    console.log('[SUB DEBUG] Datos completos:', JSON.stringify(firstSub));
-  } else {
-    console.warn('[SUB DEBUG] Ningun usuario tiene campos de tipo mes/sub/tenure');
-  }
 
   const docRef = doc(db, 'system', 'stream_history');
   const docSnap = await getDoc(docRef);
