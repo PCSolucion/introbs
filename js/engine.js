@@ -334,13 +334,7 @@ export function renderFeed(contentArea, allUsers) {
     return;
   }
 
-  const filtered = allUsers.filter(u => (u.displayName || u._id || '').toLowerCase() !== 'liiukiin');
-  const sorted = [...filtered].sort((a, b) => {
-    const lvlDiff = (b.level || 1) - (a.level || 1);
-    if (lvlDiff !== 0) return lvlDiff;
-    return (b.xp || 0) - (a.xp || 0);
-  });
-  const top10 = sorted.slice(0, 10);
+  const top10 = getTopRankedUsers(allUsers, 10);
 
   const prevRankingArray = storage.get('introbs_prev_ranking', []);
 
@@ -594,14 +588,19 @@ export function processStreamsData(data) {
 }
 
 // ─── RANKING ─────────────────────────────────────────
-export function getRankedUserIds(users) {
+export function getTopRankedUsers(users, limit = 10) {
+  if (!Array.isArray(users)) return [];
   const filtered = users.filter(u => getUserId(u) !== 'liiukiin');
   const sorted = [...filtered].sort((a, b) => {
     const lvlDiff = (b.level || 1) - (a.level || 1);
     if (lvlDiff !== 0) return lvlDiff;
     return (b.xp || 0) - (a.xp || 0);
   });
-  return sorted.map(u => getUserId(u));
+  return limit > 0 ? sorted.slice(0, limit) : sorted;
+}
+
+export function getRankedUserIds(users) {
+  return getTopRankedUsers(users, 0).map(u => getUserId(u));
 }
 
 export function updateRankingHistory(users) {
