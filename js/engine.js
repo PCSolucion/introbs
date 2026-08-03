@@ -215,11 +215,6 @@ export function formatDisplayName(u) {
   return name;
 }
 
-export function getSubMonths(u) {
-  return u.subMonths || u.months || u.sub_months || u.monthsSubscribed
-    || u.tenure || u.subCount || u.subscriptionMonths || u.totalMonths
-    || u.cumulative_months || u.cumulativeMonths || 0;
-}
 
 export function formatNum(n) {
   if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
@@ -444,54 +439,7 @@ export function renderRecentStreams(contentArea, recentStreams) {
   contentArea.appendChild(container);
 }
 
-// â”€â”€â”€ RENDER: VETERANOS (SUBS) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-export function renderVeterans(contentArea, allUsers, veteransIndex = 0) {
-  if (allUsers.length === 0) {
-    renderPlaceholder(contentArea, 'CARGANDO DATOS...');
-    return;
-  }
-  const filtered = allUsers.filter(u => {
-    const name = (u.displayName || u._id || '').toLowerCase();
-    return name !== 'liiukiin' && getSubMonths(u) > 0;
-  });
-  const sorted = [...filtered].sort((a, b) => getSubMonths(b) - getSubMonths(a));
 
-  if (sorted.length === 0) {
-    renderPlaceholder(contentArea, 'SIN DATOS DE SUBS');
-    return;
-  }
-
-  const container = document.createElement('div');
-  container.className = 'content-view-container centered-group';
-
-  const MAX = 5;
-  const chunk = sorted.slice(veteransIndex, veteransIndex + MAX);
-
-  chunk.forEach((u, i) => {
-    const row = document.createElement('div');
-    row.className = `schedule-row feed-enter ${i === 0 ? 'active' : ''}`;
-    row.style.animationDelay = `${i * 0.1}s`;
-    const name = formatDisplayName(u);
-    const months = getSubMonths(u);
-    const title = getTitle(u.level || 1);
-
-    row.innerHTML = `
-      <div class="sch-day-box">
-        <span class="sch-day-short">#${veteransIndex + i + 1}</span>
-      </div>
-      <div class="sch-main-info">
-        <div class="sch-header">
-          <span class="sch-time">${name}</span>
-          <span class="sch-badge">${months} MESES</span>
-        </div>
-        <span class="sch-game">${title}</span>
-      </div>
-      <div class="sch-decor">SUB_0${veteransIndex + i + 1}</div>
-    `;
-    container.appendChild(row);
-  });
-  contentArea.appendChild(container);
-}
 
 // ─── RENDER: PLACEHOLDER ─────────────────────────────
 export function renderPlaceholder(contentArea, title) {
