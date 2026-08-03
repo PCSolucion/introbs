@@ -23,67 +23,38 @@ console.log('[OUTRO ENGINE] Script inicializado');
     const now = new Date();
     const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
 
-    let foundStream = null;
-    let targetDate  = null;
-    let targetOffset = 0;
-
-    for (let offset = 0; offset < 7; offset++) {
+    for (let offset = 0; offset < 14; offset++) {
       const checkDate = new Date(now);
       checkDate.setDate(now.getDate() + offset);
       const dayKey = getDayKey(checkDate);
       const dayStreams = dayKey ? SCHEDULE[dayKey] : null;
 
-      if (dayStreams && dayStreams.length > 0) {
-        for (const stream of dayStreams) {
-          if (stream.game && stream.game.trim().toUpperCase() === 'DESCANSO') continue;
+      if (!dayStreams || dayStreams.length === 0) continue;
 
-          const { startTimeStr, startHour, startMin } = parseStreamTime(stream.time);
-          const streamTimeInMinutes = startHour * 60 + startMin;
+      for (const stream of dayStreams) {
+        if (stream.game && stream.game.trim().toUpperCase() === 'DESCANSO') continue;
 
-          if (offset === 0 && streamTimeInMinutes <= currentTimeInMinutes) continue;
+        const { startHour, startMin } = parseStreamTime(stream.time);
+        const streamTimeInMinutes = startHour * 60 + startMin;
 
-          foundStream  = stream;
-          targetDate   = new Date(checkDate);
-          targetDate.setHours(startHour, startMin, 0, 0);
-          targetOffset = offset;
-          break;
-        }
-      }
-      if (foundStream) break;
-    }
+        if (offset === 0 && streamTimeInMinutes <= currentTimeInMinutes) continue;
 
-    if (!foundStream) {
-      for (let offset = 7; offset < 14; offset++) {
-        const checkDate = new Date(now);
-        checkDate.setDate(now.getDate() + offset);
-        const dayKey = getDayKey(checkDate);
-        const dayStreams = dayKey ? SCHEDULE[dayKey] : null;
+        const targetDate = new Date(checkDate);
+        targetDate.setHours(startHour, startMin, 0, 0);
 
-        if (dayStreams && dayStreams.length > 0) {
-          for (const stream of dayStreams) {
-            if (stream.game && stream.game.trim().toUpperCase() === 'DESCANSO') continue;
-
-            const { startHour, startMin } = parseStreamTime(stream.time);
-            foundStream  = stream;
-            targetDate   = new Date(checkDate);
-            targetDate.setHours(startHour, startMin, 0, 0);
-            targetOffset = offset;
-            break;
-          }
-        }
-        if (foundStream) break;
+        return { stream, date: targetDate, offset };
       }
     }
 
-    return { stream: foundStream, date: targetDate, offset: targetOffset };
+    return { stream: null, date: null, offset: 0 };
   }
 
   function formatNextStreamDay(date, offset) {
     if (offset === 0) return 'HOY';
     if (offset === 1) return 'MANANA';
-    const days   = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
-    const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
-    return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]}`;
+    const dayStr   = date.toLocaleDateString('es-ES', { weekday: 'long' }).toUpperCase();
+    const monthStr = date.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase().replace('.', '');
+    return `${dayStr} ${date.getDate()} ${monthStr}`;
   }
 
   // ─── RENDER: HORARIO (exclusivo del outro — muestra el siguiente stream) ──
