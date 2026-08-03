@@ -327,7 +327,17 @@ export function renderMenu(menuList, currentMenuIndex) {
   });
 }
 
-// â”€â”€â”€ RENDER: FEED (TOP 10) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+export function getRankChangeBadge(prevRankIndex, currentRank) {
+  if (prevRankIndex === -1) {
+    return `<span class="rank-change-indicator rank-new">NEW</span>`;
+  }
+  const diff = (prevRankIndex + 1) - currentRank;
+  if (diff > 0) return `<span class="rank-change-indicator rank-up">&#9650; ${diff}</span>`;
+  if (diff < 0) return `<span class="rank-change-indicator rank-down">&#9660; ${Math.abs(diff)}</span>`;
+  return `<span class="rank-change-indicator rank-equal">EQ</span>`;
+}
+
+// ─── RENDER: FEED (TOP 10) ───────────────────────────
 export function renderFeed(contentArea, allUsers) {
   if (allUsers.length === 0) {
     renderPlaceholder(contentArea, 'CARGANDO DATOS...');
@@ -335,7 +345,6 @@ export function renderFeed(contentArea, allUsers) {
   }
 
   const top10 = getTopRankedUsers(allUsers, 10);
-
   const prevRankingArray = storage.get('introbs_prev_ranking', []);
 
   const feedContainer = document.createElement('div');
@@ -354,21 +363,7 @@ export function renderFeed(contentArea, allUsers) {
     const currentUserId = getUserId(u);
     const currentRank = i + 1;
     const prevRankIndex = prevRankingArray.indexOf(currentUserId);
-
-    let changeHTML = '';
-    if (prevRankIndex === -1) {
-      changeHTML = `<span class="rank-change-indicator rank-new">NEW</span>`;
-    } else {
-      const prevRank = prevRankIndex + 1;
-      const diff = prevRank - currentRank;
-      if (diff > 0) {
-        changeHTML = `<span class="rank-change-indicator rank-up">&#9650; ${diff}</span>`;
-      } else if (diff < 0) {
-        changeHTML = `<span class="rank-change-indicator rank-down">&#9660; ${Math.abs(diff)}</span>`;
-      } else {
-        changeHTML = `<span class="rank-change-indicator rank-equal">EQ</span>`;
-      }
-    }
+    const changeHTML = getRankChangeBadge(prevRankIndex, currentRank);
 
     row.innerHTML = `
       <div class="top-rank-col">
