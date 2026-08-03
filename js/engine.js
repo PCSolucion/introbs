@@ -384,7 +384,15 @@ export function renderFeed(contentArea, allUsers) {
   contentArea.appendChild(feedContainer);
 }
 
-// â”€â”€â”€ RENDER: ÃšLTIMOS DIRECTOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+export function formatStreamDate(rawDate) {
+  if (!rawDate) return '--/--';
+  const dateObj = rawDate?.toDate ? rawDate.toDate() : new Date(rawDate);
+  return !isNaN(dateObj)
+    ? dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })
+    : '--/--';
+}
+
+// ─── RENDER: ÚLTIMOS DIRECTOS ─────────────────────────
 export function renderRecentStreams(contentArea, recentStreams) {
   if (recentStreams.length === 0) {
     renderPlaceholder(contentArea, 'CARGANDO ARCHIVOS...');
@@ -398,14 +406,8 @@ export function renderRecentStreams(contentArea, recentStreams) {
     row.className = `schedule-row feed-enter ${i === 0 ? 'active' : ''}`;
     row.style.animationDelay = `${i * 0.1}s`;
 
-    let dateObj = null;
     const rawDate = s.date || s.timestamp || s.createdAt || s.fecha || s._docId;
-    if (rawDate?.toDate) dateObj = rawDate.toDate();
-    else if (rawDate) dateObj = new Date(rawDate);
-
-    const dateStr = dateObj && !isNaN(dateObj)
-      ? dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })
-      : '--/--';
+    const dateStr = formatStreamDate(rawDate);
 
     const title = (s._resolvedTitle || s.title || s.name || s.nombre || s.titulo || s.streamTitle || s.stream_title || s.label || 'SIN TITULO').toUpperCase();
     const category = (s.category || s.game || s.categoria || 'VARIEDAD').toUpperCase();
