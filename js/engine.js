@@ -236,13 +236,15 @@ export function formatTime(minutes) {
 
 export function parseStreamTime(timeStr) {
   if (!timeStr) return { startTimeStr: '', endTimeStr: '', startHour: 0, startMin: 0 };
-  const parts = String(timeStr).split('-');
-  const startTimeStr = parts[0] ? parts[0].trim() : '';
-  const endTimeStr = parts[1] ? parts[1].trim() : '';
-  const [startHourStr, startMinStr] = startTimeStr.split(':');
-  const startHour = Number(startHourStr) || 0;
-  const startMin = Number(startMinStr) || 0;
-  return { startTimeStr, endTimeStr, startHour, startMin };
+  const [startTimeStr = '', endTimeStr = ''] = String(timeStr).split('-').map(s => s.trim());
+  const [startHourStr = '0', startMinStr = '0'] = startTimeStr.split(':');
+
+  return {
+    startTimeStr,
+    endTimeStr,
+    startHour: parseInt(startHourStr, 10) || 0,
+    startMin: parseInt(startMinStr, 10) || 0,
+  };
 }
 
 // ─── SISTEMA DE VÍDEOS DE FONDO ──────────────────────
