@@ -48,44 +48,34 @@ console.log('[INTRO] Script inicializado');
       const dayRow = document.createElement('div');
       dayRow.className = `sch-day-row feed-enter ${active ? 'active-day-row' : ''}`;
       dayRow.style.animationDelay = `${i * 0.1}s`;
-      dayRow.style.display = 'flex';
-      dayRow.style.alignItems = 'center';
-      dayRow.style.gap = '30px';
-      dayRow.style.flex = '1';
-      dayRow.style.paddingBottom = '10px';
 
       const dayLabel = document.createElement('div');
       dayLabel.className = 'sch-day-label';
 
       const isMiercoles = k === 'miercoles';
-      const titleFontSize = isMiercoles ? (active ? '1.5rem' : '1.1rem') : (active ? '1.8rem' : '1.3rem');
-      const dateFontSize  = isMiercoles ? (active ? '1.2rem' : '0.9rem') : (active ? '1.5rem' : '1.1rem');
 
       dayLabel.innerHTML = `
-        <div style="font-family: var(--font-title); font-size: ${titleFontSize}; font-weight: 800; color: ${active ? '#fff' : 'rgba(255,255,255,0.6)'}; letter-spacing: 1px; transition: all 0.3s ease; text-transform: uppercase; text-shadow: ${active ? '0 0 15px rgba(var(--cyber-red-rgb), 0.7)' : 'none'};">
-          ${DAY_NAMES[k]} <span style="font-family: var(--font-mono); font-size: ${dateFontSize}; color: ${active ? '#fff' : 'rgba(255,255,255,0.4)'}; text-shadow: ${active ? '0 0 10px rgba(255,255,255,0.8)' : 'none'};">${displayDate}</span>
+        <div class="sch-day-title ${isMiercoles ? 'is-miercoles' : ''}">
+          ${DAY_NAMES[k]} <span class="sch-day-date">${displayDate}</span>
         </div>
         ${active ? '<div class="sch-badge-today">HOY</div>' : ''}
       `;
       dayRow.appendChild(dayLabel);
 
       const gamesCol = document.createElement('div');
-      gamesCol.style.flex = '1';
-      gamesCol.style.display = 'flex';
-      gamesCol.style.gap = '30px';
+      gamesCol.className = 'sch-games-col';
 
       gamesList.forEach(g => {
-        const isRest = g.game.trim().toUpperCase() === 'DESCANSO';
         const gameCard = document.createElement('div');
-        gameCard.className = `sch-card ${active ? 'active-day' : ''} ${isRest ? 'sch-card-rest' : ''}`;
+        gameCard.className = `sch-card ${active ? 'active-day' : ''}`;
 
         const { startTimeStr, endTimeStr } = parseStreamTime(g.time);
 
         const syncUrl = getGameImageSync(g.game);
-        const objectPositionStyle = isRest ? 'center 25%' : 'center';
+        const isDescanso = g.game.trim().toUpperCase() === 'DESCANSO';
 
         gameCard.innerHTML = `
-          <img class="sch-card-img sch-new-img" data-game="${g.game}" data-active="${active}" src="${syncUrl}" style="object-position: ${objectPositionStyle}; ${syncUrl ? 'opacity: 1; transform: scale(1.08);' : ''}">
+          <img class="sch-card-img sch-new-img ${isDescanso ? 'descanso' : ''}" data-game="${g.game}" data-active="${active}" src="${syncUrl}" style="${syncUrl ? 'opacity: 1; transform: scale(1.08);' : ''}">
           <div class="sch-card-overlay"></div>
           <div class="sch-card-content">
             <div class="sch-card-title">${g.game}</div>

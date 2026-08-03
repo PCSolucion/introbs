@@ -100,9 +100,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
     const { startTimeStr } = parseStreamTime(stream.time);
 
     const container = document.createElement('div');
-    container.className = 'content-view-container feed-enter';
-    container.style.gap = '25px';
-    container.style.justifyContent = 'center';
+    container.className = 'content-view-container feed-enter sch-outro-container';
 
     // Cabecera
     const headerEl = document.createElement('div');
@@ -112,20 +110,20 @@ console.log('[OUTRO ENGINE] Script inicializado');
 
     // Obtener la URL sincrónicamente (sin retardo)
     const syncUrl = getGameImageSync(stream.game);
-    const objectPositionStyle = stream.game.trim().toUpperCase() === 'DESCANSO' ? 'center 25%' : 'center';
+    const isDescanso = stream.game.trim().toUpperCase() === 'DESCANSO';
 
     // Caja de juego
     const gameDisplay = document.createElement('div');
     gameDisplay.className = 'sch-card active-day outro-version';
 
     gameDisplay.innerHTML = `
-      <img class="sch-card-img sch-new-img" data-game="${stream.game}" src="${syncUrl}" style="object-position: ${objectPositionStyle}; ${syncUrl ? 'opacity: 0.55; transform: scale(1.06);' : ''}">
+      <img class="sch-card-img sch-new-img ${isDescanso ? 'descanso' : ''}" data-game="${stream.game}" src="${syncUrl}" style="${syncUrl ? 'opacity: 0.55; transform: scale(1.06);' : ''}">
       <div class="sch-card-overlay"></div>
       <div class="sch-card-content">
         <h2 class="sch-outro-game-title">
           ${stream.game}
         </h2>
-        <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+        <div class="sch-card-footer">
           <span class="sch-outro-date">
             ${formattedDay}
           </span>
@@ -168,18 +166,6 @@ console.log('[OUTRO ENGINE] Script inicializado');
 
     const logIndicator = document.createElement('span');
     logIndicator.className = 'sch-outro-pulse-indicator';
-
-    if (!document.getElementById('outroKeyframes')) {
-      const style = document.createElement('style');
-      style.id          = 'outroKeyframes';
-      style.textContent = `
-        @keyframes logPulse {
-          0%, 100% { opacity: 0.3; transform: scale(0.9); }
-          50%       { opacity: 1;   transform: scale(1.1); }
-        }
-      `;
-      document.head.appendChild(style);
-    }
 
     bottomLog.appendChild(logIndicator);
     const textSpan = document.createElement('span');
