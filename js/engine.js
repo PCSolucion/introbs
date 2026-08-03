@@ -110,6 +110,19 @@ export function getGameImageSync(gameName) {
   return '';
 }
 
+export function bindAsyncGameImage(imgEl, gameName, targetOpacity = '1', targetScale = 'scale(1.08)') {
+  if (!imgEl || !gameName) return;
+  getGameImage(gameName).then(url => {
+    if (url) {
+      imgEl.src = url;
+      setTimeout(() => {
+        imgEl.style.opacity = targetOpacity;
+        imgEl.style.transform = targetScale;
+      }, 50);
+    }
+  });
+}
+
 export async function getGameImage(gameName) {
   if (!gameName) return '';
   const syncUrl = getGameImageSync(gameName);

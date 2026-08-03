@@ -7,7 +7,7 @@
 
 import {
   SCHEDULE, getDayKey,
-  getGameImage, getGameImageSync, preloadGameImage, parseStreamTime,
+  getGameImageSync, bindAsyncGameImage, preloadGameImage, parseStreamTime,
   renderPlaceholder, initAppController
 } from './engine.js';
 
@@ -105,14 +105,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
 
     // Fallback asíncrono si la imagen no estaba en la caché sincrónica inicial
     if (!syncUrl) {
-      const img = gameDisplay.querySelector('.sch-card-img');
-      getGameImage(stream.game).then(url => {
-        if (url) {
-          img.src = url;
-          img.style.opacity = '0.55';
-          img.style.transform = 'scale(1.06)';
-        }
-      });
+      bindAsyncGameImage(gameDisplay.querySelector('.sch-card-img'), stream.game, '0.55', 'scale(1.06)');
     }
 
     // Caja countdown

@@ -6,7 +6,7 @@
 
 import {
   SCHEDULE, DAY_NAMES, getDayKey, getWeekDates,
-  getGameImage, getGameImageSync, preloadGameImage, parseStreamTime,
+  getGameImageSync, bindAsyncGameImage, preloadGameImage, parseStreamTime,
   initAppController
 } from './engine.js';
 
@@ -71,16 +71,7 @@ console.log('[INTRO] Script inicializado');
         gamesCol.appendChild(gameCard);
 
         if (!syncUrl) {
-          const img = gameCard.querySelector('.sch-card-img');
-          getGameImage(g.game).then(url => {
-            if (url) {
-              img.src = url;
-              setTimeout(() => {
-                img.style.opacity = '1';
-                img.style.transform = 'scale(1.08)';
-              }, 50);
-            }
-          });
+          bindAsyncGameImage(gameCard.querySelector('.sch-card-img'), g.game);
         }
       });
 
