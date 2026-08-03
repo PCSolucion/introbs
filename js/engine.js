@@ -248,6 +248,14 @@ export function parseStreamTime(timeStr) {
 }
 
 // ─── SISTEMA DE VÍDEOS DE FONDO ──────────────────────
+const VIDEO_RATES = {
+  'fondos/isabela.mp4': 0.5
+};
+
+function getVideoPlaybackRate(videoFile) {
+  return VIDEO_RATES[videoFile] || 1.0;
+}
+
 export function initVideoBackground() {
   const v1 = document.getElementById('bgVideo1');
   const v2 = document.getElementById('bgVideo2');
@@ -259,7 +267,7 @@ export function initVideoBackground() {
   let isSwitching = false;
 
   activeV.src = CONFIG.backgrounds[bgi];
-  activeV.playbackRate = CONFIG.backgrounds[bgi] === 'fondos/isabela.mp4' ? 0.5 : 1.0;
+  activeV.playbackRate = getVideoPlaybackRate(CONFIG.backgrounds[bgi]);
   activeV.play().catch(e => console.log('Autoplay blocked initially:', e));
   bgi = (bgi + 1) % CONFIG.backgrounds.length;
 
@@ -284,7 +292,7 @@ export function initVideoBackground() {
     const onLoaded = async () => {
       cleanup();
       try {
-        nextV.playbackRate = videoFile === 'fondos/isabela.mp4' ? 0.5 : 1.0;
+        nextV.playbackRate = getVideoPlaybackRate(videoFile);
         await nextV.play();
         nextV.style.opacity = '1';
         activeV.style.opacity = '0';
