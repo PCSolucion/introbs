@@ -6,7 +6,7 @@
 
 import {
   SCHEDULE, DAY_NAMES, getDayKey, getWeekDates,
-  getGameImageSync, bindAsyncGameImage, preloadGameImage, parseStreamTime,
+  getGameImageSync, bindAsyncGameImage, isDescansoGame, preloadGameImage, parseStreamTime,
   initAppController
 } from './engine.js';
 
@@ -55,7 +55,7 @@ console.log('[INTRO] Script inicializado');
         const { startTimeStr, endTimeStr } = parseStreamTime(g.time);
 
         const syncUrl = getGameImageSync(g.game);
-        const isDescanso = g.game.trim().toUpperCase() === 'DESCANSO';
+        const isDescanso = isDescansoGame(g.game);
 
         gameCard.innerHTML = `
           <img class="sch-card-img sch-new-img ${isDescanso ? 'descanso' : ''}" data-game="${g.game}" data-active="${active}" src="${syncUrl}" style="${syncUrl ? 'opacity: 1; transform: scale(1.08);' : ''}">

@@ -89,13 +89,22 @@ export async function preloadGameImage(gameName) {
   }
 }
 
+export const SPECIAL_GAMES = {
+  DESCANSO: { image: 'fondos/descanso.png', isDescanso: true },
+  INFORMATICA: { image: 'fondos/informatica-bg.jpg' },
+};
+
+export function isDescansoGame(gameName) {
+  if (!gameName) return false;
+  return String(gameName).trim().toUpperCase() === 'DESCANSO';
+}
+
 export function getGameImageSync(gameName) {
   if (!gameName) return '';
   const cleanName = gameName.trim();
   const upper = cleanName.toUpperCase();
 
-  if (upper === 'DESCANSO') return 'fondos/descanso.png';
-  if (upper === 'INFORMATICA') return 'fondos/informatica-bg.jpg';
+  if (SPECIAL_GAMES[upper]) return SPECIAL_GAMES[upper].image;
 
   if (gameImageCache[cleanName]) {
     return gameImageCache[cleanName] === 'NOT_FOUND' ? '' : gameImageCache[cleanName];

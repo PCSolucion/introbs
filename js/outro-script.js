@@ -7,7 +7,7 @@
 
 import {
   SCHEDULE, getDayKey,
-  getGameImageSync, bindAsyncGameImage, preloadGameImage, parseStreamTime,
+  getGameImageSync, bindAsyncGameImage, isDescansoGame, preloadGameImage, parseStreamTime,
   renderPlaceholder, initAppController
 } from './engine.js';
 
@@ -32,7 +32,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
       if (!dayStreams || dayStreams.length === 0) continue;
 
       for (const stream of dayStreams) {
-        if (stream.game && stream.game.trim().toUpperCase() === 'DESCANSO') continue;
+        if (stream.game && isDescansoGame(stream.game)) continue;
 
         const { startHour, startMin } = parseStreamTime(stream.time);
         const streamTimeInMinutes = startHour * 60 + startMin;
@@ -78,7 +78,7 @@ console.log('[OUTRO ENGINE] Script inicializado');
 
     // Obtener la URL sincrónicamente (sin retardo)
     const syncUrl = getGameImageSync(stream.game);
-    const isDescanso = stream.game.trim().toUpperCase() === 'DESCANSO';
+    const isDescanso = isDescansoGame(stream.game);
 
     // Caja de juego
     const gameDisplay = document.createElement('div');
