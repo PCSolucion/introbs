@@ -5,7 +5,7 @@
    ═══════════════════════════════════════════════════════ */
 
 import {
-  SCHEDULE, DAY_NAMES,
+  SCHEDULE, DAY_NAMES, getDayKey, getWeekDates,
   getGameImage, getGameImageSync, preloadGameImage, parseStreamTime,
   initAppController
 } from './engine.js';
@@ -17,25 +17,8 @@ console.log('[INTRO] Script inicializado');
 
   // ─── RENDER: HORARIO (exclusivo de la intro) ──────────────
   function renderSchedule(contentArea) {
-    const today = new Date();
-    let todayIdx = today.getDay();
-    if (todayIdx === 0) todayIdx = 7;
-
-    const mondayDate = new Date(today);
-    mondayDate.setDate(today.getDate() - (todayIdx - 1));
-
-    const dayKeys = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
-    const todayKey = dayKeys[todayIdx - 1] || null;
-
-    const weekDates = dayKeys.map((key, index) => {
-      const d = new Date(mondayDate);
-      let dayOffset = index;
-      if (index + 1 < todayIdx) dayOffset += 7;
-      d.setDate(mondayDate.getDate() + dayOffset);
-      const dayStr = d.getDate().toString().padStart(2, '0');
-      let monthStr = d.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase().replace('.', '');
-      return { day: dayStr, month: monthStr };
-    });
+    const todayKey = getDayKey();
+    const weekDates = getWeekDates();
 
     const scheduleContainer = document.createElement('div');
     scheduleContainer.className = 'content-view-container';

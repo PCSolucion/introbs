@@ -6,7 +6,7 @@
    ═══════════════════════════════════════════════════════ */
 
 import {
-  SCHEDULE,
+  SCHEDULE, getDayKey,
   getGameImage, getGameImageSync, preloadGameImage, parseStreamTime,
   renderPlaceholder, initAppController
 } from './engine.js';
@@ -17,7 +17,6 @@ console.log('[OUTRO ENGINE] Script inicializado');
   'use strict';
 
   let countdownInterval = null;
-  const dayKeys = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
 
   // ─── LOGICA DE BUSQUEDA DEL SIGUIENTE STREAM ─────────────
   function findNextStream() {
@@ -31,9 +30,8 @@ console.log('[OUTRO ENGINE] Script inicializado');
     for (let offset = 0; offset < 7; offset++) {
       const checkDate = new Date(now);
       checkDate.setDate(now.getDate() + offset);
-      const checkDayIndex = checkDate.getDay() === 0 ? 7 : checkDate.getDay();
-      const dayKey = dayKeys[checkDayIndex - 1];
-      const dayStreams = SCHEDULE[dayKey];
+      const dayKey = getDayKey(checkDate);
+      const dayStreams = dayKey ? SCHEDULE[dayKey] : null;
 
       if (dayStreams && dayStreams.length > 0) {
         for (const stream of dayStreams) {
@@ -58,9 +56,8 @@ console.log('[OUTRO ENGINE] Script inicializado');
       for (let offset = 7; offset < 14; offset++) {
         const checkDate = new Date(now);
         checkDate.setDate(now.getDate() + offset);
-        const checkDayIndex = checkDate.getDay() === 0 ? 7 : checkDate.getDay();
-        const dayKey = dayKeys[checkDayIndex - 1];
-        const dayStreams = SCHEDULE[dayKey];
+        const dayKey = getDayKey(checkDate);
+        const dayStreams = dayKey ? SCHEDULE[dayKey] : null;
 
         if (dayStreams && dayStreams.length > 0) {
           for (const stream of dayStreams) {

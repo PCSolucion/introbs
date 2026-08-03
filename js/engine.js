@@ -130,6 +130,34 @@ export const DAY_NAMES = {
   jueves: 'JUEVES', viernes: 'VIERNES',
 };
 
+export const DAY_KEYS = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+
+export function getNormalizedDayIndex(date = new Date()) {
+  const day = date.getDay();
+  return day === 0 ? 7 : day;
+}
+
+export function getDayKey(date = new Date()) {
+  const idx = getNormalizedDayIndex(date);
+  return DAY_KEYS[idx - 1] || null;
+}
+
+export function getWeekDates(baseDate = new Date()) {
+  const todayIdx = getNormalizedDayIndex(baseDate);
+  const mondayDate = new Date(baseDate);
+  mondayDate.setDate(baseDate.getDate() - (todayIdx - 1));
+
+  return DAY_KEYS.map((key, index) => {
+    const d = new Date(mondayDate);
+    let dayOffset = index;
+    if (index + 1 < todayIdx) dayOffset += 7;
+    d.setDate(mondayDate.getDate() + dayOffset);
+    const dayStr = d.getDate().toString().padStart(2, '0');
+    let monthStr = d.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase().replace('.', '');
+    return { day: dayStr, month: monthStr };
+  });
+}
+
 // ─── HELPERS ─────────────────────────────────────────
 export function getUserId(u) {
   if (!u) return '';
