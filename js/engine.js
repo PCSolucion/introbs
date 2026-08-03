@@ -40,21 +40,44 @@ export const CONFIG = {
   countdownMinutes: 5,
 };
 
+// ─── STORAGE UTILITY (localStorage wrapper) ───────────
+export const storage = {
+  get(key, fallback = null) {
+    try {
+      const item = localStorage.getItem(key);
+      return item !== null ? JSON.parse(item) : fallback;
+    } catch (e) {
+      console.warn(`[Storage] Error al leer '${key}':`, e);
+      return fallback;
+    }
+  },
+  set(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (e) {
+      console.warn(`[Storage] Error al guardar '${key}':`, e);
+      return false;
+    }
+  },
+  remove(key) {
+    try {
+      localStorage.removeItem(key);
+    } catch (e) {
+      console.warn(`[Storage] Error al eliminar '${key}':`, e);
+    }
+  }
+};
+
 const gameImageCache = {};
 const RAWG_CACHE_KEY = 'introbs_rawg_image_cache_v1';
 
 function getRawgCache() {
-  try {
-    return JSON.parse(localStorage.getItem(RAWG_CACHE_KEY) || '{}');
-  } catch (e) {
-    return {};
-  }
+  return storage.get(RAWG_CACHE_KEY, {});
 }
 
 function saveRawgCache(cache) {
-  try {
-    localStorage.setItem(RAWG_CACHE_KEY, JSON.stringify(cache));
-  } catch (e) {}
+  storage.set(RAWG_CACHE_KEY, cache);
 }
 
 export async function preloadGameImage(gameName) {
@@ -292,13 +315,7 @@ export function renderFeed(contentArea, allUsers) {
   });
   const top10 = sorted.slice(0, 10);
 
-  let prevRankingArray = [];
-  try {
-    const storedPrev = localStorage.getItem('introbs_prev_ranking');
-    if (storedPrev) prevRankingArray = JSON.parse(storedPrev);
-  } catch (e) {
-    console.error('Error parsing prev ranking in renderFeed:', e);
-  }
+  const prevRankingArray = storage.get('introbs_prev_ranking', []);
 
   const feedContainer = document.createElement('div');
   feedContainer.className = 'content-view-container';
@@ -501,14 +518,14 @@ export function buildFeedQueue(users) {
   return queue;
 }
 
-// â”€â”€â”€ CACHE (localStorage) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── CACHE (localStorage) ─────────────────────────────
 const CACHE_TTL           = 1 * 60 * 60 * 1000; // 1 hora
 const CACHE_KEY_USERS     = 'introbs_cache_users_v4';
 const CACHE_KEY_STREAMS   = 'introbs_cache_streams_v4';
 const CACHE_KEY_TIMESTAMP = 'introbs_cache_ts_v4';
 
 export function isCacheValid() {
-  const ts = localStorage.getItem(CACHE_KEY_TIMESTAMP);
+  const ts = storage.get(CACHE_KEY_TIMESTAMP, null);
   if (!ts) return false;
   const age = Date.now() - Number(ts);
   console.log(`[CACHE] Antiguedad: ${(age / 3600000).toFixed(1)}h - TTL: ${CACHE_TTL / 3600000}h`);
@@ -516,26 +533,19 @@ export function isCacheValid() {
 }
 
 export function saveToCache(users, streams) {
-  try {
-    localStorage.setItem(CACHE_KEY_USERS, JSON.stringify(users));
-    localStorage.setItem(CACHE_KEY_STREAMS, JSON.stringify(streams));
-    localStorage.setItem(CACHE_KEY_TIMESTAMP, String(Date.now()));
+  const successUsers = storage.set(CACHE_KEY_USERS, users);
+  const successStreams = storage.set(CACHE_KEY_STREAMS, streams);
+  const successTs = storage.set(CACHE_KEY_TIMESTAMP, Date.now());
+  if (successUsers && successStreams && successTs) {
     console.log(`[CACHE] Datos guardados - ${users.length} usuarios, ${streams.length} streams`);
-  } catch (e) {
-    console.warn('[CACHE] Error al guardar en localStorage:', e);
   }
 }
 
 export function loadFromCache() {
-  try {
-    const users   = JSON.parse(localStorage.getItem(CACHE_KEY_USERS)   || '[]');
-    const streams = JSON.parse(localStorage.getItem(CACHE_KEY_STREAMS) || '[]');
-    console.log(`[CACHE] Datos recuperados - ${users.length} usuarios, ${streams.length} streams`);
-    return { users, streams };
-  } catch (e) {
-    console.warn('[CACHE] Error al leer cache:', e);
-    return { users: [], streams: [] };
-  }
+  const users   = storage.get(CACHE_KEY_USERS, []);
+  const streams = storage.get(CACHE_KEY_STREAMS, []);
+  console.log(`[CACHE] Datos recuperados - ${users.length} usuarios, ${streams.length} streams`);
+  return { users, streams };
 }
 
 // â”€â”€â”€ PROCESO DE STREAMS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -615,24 +625,19 @@ export function getRankedUserIds(users) {
 }
 
 export function updateRankingHistory(users) {
-  try {
-    const currentRankedIds = getRankedUserIds(users);
-    let storedCurr = localStorage.getItem('introbs_curr_ranking');
+  const currentRankedIds = getRankedUserIds(users);
+  const storedCurr = storage.get('introbs_curr_ranking', null);
 
-    if (!storedCurr) {
-      localStorage.setItem('introbs_curr_ranking', JSON.stringify(currentRankedIds));
-      localStorage.setItem('introbs_prev_ranking', JSON.stringify(currentRankedIds));
-    } else {
-      const parsedCurr = JSON.parse(storedCurr);
-      const isDifferent = parsedCurr.length !== currentRankedIds.length ||
-        currentRankedIds.some((id, idx) => id !== parsedCurr[idx]);
-      if (isDifferent) {
-        localStorage.setItem('introbs_prev_ranking', JSON.stringify(parsedCurr));
-        localStorage.setItem('introbs_curr_ranking', JSON.stringify(currentRankedIds));
-      }
+  if (!storedCurr) {
+    storage.set('introbs_curr_ranking', currentRankedIds);
+    storage.set('introbs_prev_ranking', currentRankedIds);
+  } else {
+    const isDifferent = storedCurr.length !== currentRankedIds.length ||
+      currentRankedIds.some((id, idx) => id !== storedCurr[idx]);
+    if (isDifferent) {
+      storage.set('introbs_prev_ranking', storedCurr);
+      storage.set('introbs_curr_ranking', currentRankedIds);
     }
-  } catch (e) {
-    console.error('Error handling rank history:', e);
   }
 }
 
