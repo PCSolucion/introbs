@@ -5,8 +5,8 @@
    ═══════════════════════════════════════════════════════ */
 
 :root {
-  --cyber-red: #008ec2;
-  --cyber-red-rgb: 0, 142, 194;
+  --cyber-red: #8163F6;
+  --cyber-red-rgb: 129, 99, 246;
   --cyber-yellow: #dbbe3b;
   --cyber-yellow-rgb: 219, 190, 59;
   --takeru-yellow: #fcee09;
@@ -136,7 +136,7 @@ html, body {
 
 /* Panel Izquierdo (Horario) - Diagonal Tekken y Rojo uniforme */
 .hud-panel:first-child {
-  flex: 0 0 600px;
+  flex: 0 0 480px;
   background: rgba(var(--cyber-red-rgb), 0.55); /* Transparencia intermedia */
   clip-path: polygon(0 0, 100% 0, 70% 100%, 0 100%);
   z-index: 2;
@@ -145,10 +145,10 @@ html, body {
 /* Panel Derecho (Feed) - Pegado perfectamente a la diagonal */
 .hud-panel:last-child {
   flex: 1;
-  margin-left: -180px; /* Overlap exacto (30% de 600px) */
+  margin-left: -144px; /* Overlap exacto (30% de 480px) */
   background: var(--bg-panel);
   /* El recorte del segundo panel debe coincidir con el final del primero */
-  clip-path: polygon(180px 0, 100% 0, 100% 100%, 0 100%);
+  clip-path: polygon(144px 0, 100% 0, 100% 100%, 0 100%);
   z-index: 1;
 }
 
@@ -173,7 +173,7 @@ html, body {
 
 /* El contentArea (panel derecho) necesita padding-left extra para librar la diagonal y empieza más arriba de forma natural */
 #contentArea {
-  padding: 80px 30px 80px 200px;
+  padding: 80px 30px 80px 165px;
 }
 
 /* Contenedor flexible para estructurar el contenido de las vistas */
@@ -205,23 +205,18 @@ html, body {
   transition: all 0.4s ease;
 }
 
+#menuList {
+  padding: 340px 0 80px 0;
+}
+
 /* Escalonamiento del MENU — calculado para que el texto no se corte por el clip-path */
-/* El panel es 600px de ancho. clip-path: polygon(0 0, 100% 0, 70% 100%, 0 100%) */
-/* A altura Y del item, el borde derecho visible es: 600 - (600*0.30 * Y/height) */
-/* Con padding-top: 340px, gap: 15px, items ~55px alto → posiciones aprox 340, 410, 480, 550, 620, 690 */
-/* Margen de seguridad de 20px del borde visible */
-#menuList .card-item:nth-child(1) { padding-right: 40px;  padding-left: 200px; text-align: right; justify-content: flex-end; }
-#menuList .card-item:nth-child(2) { padding-right: 63px;  padding-left: 180px; text-align: right; justify-content: flex-end; }
-#menuList .card-item:nth-child(3) { padding-right: 86px;  padding-left: 160px; text-align: right; justify-content: flex-end; }
-#menuList .card-item:nth-child(4) { padding-right: 109px; padding-left: 140px; text-align: right; justify-content: flex-end; }
-#menuList .card-item:nth-child(5) { padding-right: 132px; padding-left: 120px; text-align: right; justify-content: flex-end; }
-#menuList .card-item:nth-child(6) { padding-right: 155px; padding-left: 100px; text-align: right; justify-content: flex-end; }
-
-
-
-
-
-
+/* El panel es 480px de ancho. clip-path: polygon(0 0, 100% 0, 70% 100%, 0 100%) */
+#menuList .card-item:nth-child(1) { padding-right: 80px;  padding-left: 140px; text-align: right; justify-content: flex-end; }
+#menuList .card-item:nth-child(2) { padding-right: 103px; padding-left: 120px; text-align: right; justify-content: flex-end; }
+#menuList .card-item:nth-child(3) { padding-right: 126px; padding-left: 100px; text-align: right; justify-content: flex-end; }
+#menuList .card-item:nth-child(4) { padding-right: 149px; padding-left: 80px;  text-align: right; justify-content: flex-end; }
+#menuList .card-item:nth-child(5) { padding-right: 172px; padding-left: 60px;  text-align: right; justify-content: flex-end; }
+#menuList .card-item:nth-child(6) { padding-right: 195px; padding-left: 50px;  text-align: right; justify-content: flex-end; }
 
 #menuList .card-item {
   width: 100%;
@@ -239,34 +234,15 @@ html, body {
   width: auto;
 }
 
-
-#menuList .card-item.active::before {
-  background: var(--cyber-red);
-  box-shadow: var(--glow-red);
-  right: 0;
-  left: auto;
-}
-
-
-/* El active bar se quita del default para el horario y se maneja por el 'right: 0' */
-.card-item::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 15%; bottom: 15%;
-  width: 4px;
-  background: transparent;
-  transition: all 0.3s ease;
-}
-
 .card-item.active {
   border: none !important;
-  border-left: 3px solid rgba(var(--cyber-red-rgb), 0.7) !important; /* Borde acento izquierdo */
-  background: rgba(var(--cyber-red-rgb), 0.15);
+  border-left: 4px solid var(--cyber-red) !important; /* Borde acento izquierdo en todo el borde del sidebar */
+  background: rgba(var(--cyber-red-rgb), 0.35) !important;
+  box-shadow: inset 4px 0 16px rgba(var(--cyber-red-rgb), 0.3) !important;
   backdrop-filter: blur(4px);
-  padding-left: 0 !important;
 }
 #menuList .card-item.active::before {
-  display: none; /* Quitamos definitivamente la línea lateral */
+  display: none;
 }
 #menuList .card-item::before {
   display: none;
@@ -275,7 +251,7 @@ html, body {
 
 
 #contentArea .card-item {
-  padding-left: 170px; /* Separación clara de la diagonal */
+  padding-left: 135px; /* Separación clara de la diagonal */
 }
 
 

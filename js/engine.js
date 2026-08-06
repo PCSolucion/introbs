@@ -92,6 +92,9 @@ export async function preloadGameImage(gameName) {
 export const SPECIAL_GAMES = {
   DESCANSO: { image: 'fondos/descanso.png', isDescanso: true },
   INFORMATICA: { image: 'fondos/informatica-bg.jpg' },
+  'BEAST OF REINCARNATION': { image: 'https://gameinformer.com/sites/default/files/styles/content_header_l/public/2026/07/31/1cdb0ec4/bor_keyart_4k.jpg.webp' },
+  'DEAD SPACE REMAKE': { image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1693980/capsule_616x353.jpg?t=1777396576' },
+  'DEAD SPACE': { image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1693980/capsule_616x353.jpg?t=1777396576' },
 };
 
 export function isDescansoGame(gameName) {
