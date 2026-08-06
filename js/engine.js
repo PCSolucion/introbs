@@ -173,12 +173,18 @@ export const MENU_ITEMS = [
   { id: 'item1',    title: 'ULTIMOS DIRECTOS', sub: 'Archive' },
 ];
 
-export const DAY_NAMES = {
-  lunes: 'LUNES', martes: 'MARTES', miercoles: 'MIERCOLES',
-  jueves: 'JUEVES', viernes: 'VIERNES',
+export const MENU_DURATIONS = {
+  horario: 15000,   // 15 segundos (un poco menos de 20s)
+  topcanal: 40000,  // 40 segundos (el doble de 20s)
+  item1: 10000,     // 10 segundos (la mitad de 20s)
 };
 
-export const DAY_KEYS = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+export const DAY_NAMES = {
+  lunes: 'LUNES', martes: 'MARTES', miercoles: 'MIERCOLES',
+  jueves: 'JUEVES', viernes: 'VIERNES', sabado: 'SABADO', domingo: 'DOMINGO',
+};
+
+export const DAY_KEYS = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
 
 export function getNormalizedDayIndex(date = new Date()) {
   const day = date.getDay();
@@ -313,7 +319,7 @@ export function initVideoBackground() {
   setInterval(switchVideo, CONFIG.bgInterval);
 }
 
-// â”€â”€â”€ RENDER: MENÃš â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── RENDER: MENÚ ────────────────────────────────────────────
 export function renderMenu(menuList, currentMenuIndex) {
   menuList.innerHTML = '';
   MENU_ITEMS.forEach((item, idx) => {
@@ -351,41 +357,74 @@ export function renderFeed(contentArea, allUsers) {
   const prevRankingArray = storage.get('introbs_prev_ranking', []);
 
   const feedContainer = document.createElement('div');
-  feedContainer.className = 'content-view-container';
+  feedContainer.className = 'content-view-container sch-strips-container';
 
   top10.forEach((u, i) => {
-    const row = document.createElement('div');
-    row.className = `schedule-row top-row feed-enter ${i === 0 ? 'active' : ''}`;
-    row.style.animationDelay = `${i * 0.08}s`;
-    row.style.marginBottom = '0';
-
     const name = formatDisplayName(u);
     const lvl = u.level || 1;
-    const title = getTitle(lvl);
 
     const currentUserId = getUserId(u);
     const currentRank = i + 1;
     const prevRankIndex = prevRankingArray.indexOf(currentUserId);
     const changeHTML = getRankChangeBadge(prevRankIndex, currentRank);
 
-    row.innerHTML = `
-      <div class="top-rank-col">
-        <span class="top-rank-num">#${i + 1}</span>
-        ${changeHTML}
-      </div>
-      <div class="top-info-col">
-        <span class="top-name">${name}</span>
-        <span class="top-title">${title}</span>
-      </div>
-      <div class="top-level-col">
-        <span class="top-level-val">LVL ${lvl}</span>
-        <span class="top-level-lbl">STATUS DATA</span>
-      </div>
+    // ── Useful side-by-side stats from Firestore
+    const xp = u.xp || 0;
+    const msgs = u.totalMessages || u.messagesCount || u.messages || 0;
+    const streak = u.streakDays || u.streak || 0;
+    const watch = u.watchTimeMinutes || u.watchTime || 0;
+    const boost = (1 + Math.min(1.5, (streak * 0.05) + (lvl * 0.01))).toFixed(1);
+
+    const statsList = [
+      `<span class="sch-stat"><span class="sch-stat-lbl">XP</span> <span class="sch-stat-val">${formatNum(xp)}</span></span>`,
+      `<span class="sch-stat"><span class="sch-stat-lbl">CHAT</span> <span class="sch-stat-val">${formatNum(msgs)} MSG</span></span>`,
+      `<span class="sch-stat"><span class="sch-stat-lbl">BOOST</span> <span class="sch-stat-val">x${boost}</span></span>`,
+    ];
+    if (watch > 0) {
+      statsList.push(`<span class="sch-stat"><span class="sch-stat-lbl">TIEMPO</span> <span class="sch-stat-val">${formatTime(watch)}</span></span>`);
+    }
+
+    const statsHTML = statsList.join('<span class="sch-stat-sep">//</span>');
+
+    const strip = document.createElement('div');
+    strip.className = 'sch-strip sch-strip--ranked feed-enter';
+    strip.style.animationDelay = `${i * 0.06}s`;
+
+    // ── Smooth gradient: --si goes from 1.0 (#1) to 0.0 (#10)
+    const intensity = 1 - (i / (top10.length - 1 || 1));
+    strip.style.setProperty('--si', intensity.toFixed(3));
+
+    // ── Rank column
+    const rankCol = document.createElement('div');
+    rankCol.className = 'sch-strip-day';
+    rankCol.innerHTML = `
+      <span class="sch-strip-dayname">#${currentRank}</span>
+      <span class="sch-strip-date">${changeHTML}</span>
     `;
-    feedContainer.appendChild(row);
+    strip.appendChild(rankCol);
+
+    // ── Divider
+    const divider = document.createElement('div');
+    divider.className = 'sch-strip-divider';
+    strip.appendChild(divider);
+
+    // ── Content: name + side-by-side stats
+    const content = document.createElement('div');
+    content.className = 'sch-strip-content';
+    content.innerHTML = `
+      <div class="sch-strip-game-row">
+        <span class="sch-strip-game">${name}</span>
+        <span class="sch-strip-time">LVL ${lvl}</span>
+      </div>
+      <div class="sch-strip-stats">${statsHTML}</div>
+    `;
+    strip.appendChild(content);
+
+    feedContainer.appendChild(strip);
   });
   contentArea.appendChild(feedContainer);
 }
+
 
 export function formatStreamDate(rawDate) {
   if (!rawDate) return '--/--';
@@ -402,36 +441,49 @@ export function renderRecentStreams(contentArea, recentStreams) {
     return;
   }
   const container = document.createElement('div');
-  container.className = 'content-view-container centered-group';
+  container.className = 'content-view-container sch-strips-container';
 
   recentStreams.forEach((s, i) => {
-    const row = document.createElement('div');
-    row.className = `schedule-row feed-enter ${i === 0 ? 'active' : ''}`;
-    row.style.animationDelay = `${i * 0.1}s`;
-
     const rawDate = s.date || s.timestamp || s.createdAt || s.fecha || s._docId;
     const dateStr = formatStreamDate(rawDate);
 
     const title = (s._resolvedTitle || s.title || s.name || s.nombre || s.titulo || s.streamTitle || s.stream_title || s.label || 'SIN TITULO').toUpperCase();
     const category = (s.category || s.game || s.categoria || 'VARIEDAD').toUpperCase();
 
-    row.innerHTML = `
-      <div class="sch-day-box">
-        <span class="sch-day-short">${dateStr}</span>
-      </div>
-      <div class="sch-main-info">
-        <div class="sch-header">
-          <span class="sch-time">${title}</span>
-          <span class="sch-badge">ARCHIVE</span>
-        </div>
-        <span class="sch-game">${category}</span>
-      </div>
-      <div class="sch-decor">DB_X${i + 1}</div>
+    const strip = document.createElement('div');
+    strip.className = `sch-strip feed-enter${i === 0 ? ' sch-strip--active' : ''}`;
+    strip.style.animationDelay = `${i * 0.08}s`;
+
+    // ── Date column
+    const dateCol = document.createElement('div');
+    dateCol.className = 'sch-strip-day';
+    dateCol.innerHTML = `
+      <span class="sch-strip-dayname">${dateStr}</span>
+      <span class="sch-strip-date">ARCHIVE</span>
     `;
-    container.appendChild(row);
+    strip.appendChild(dateCol);
+
+    // ── Divider
+    const divider = document.createElement('div');
+    divider.className = 'sch-strip-divider';
+    strip.appendChild(divider);
+
+    // ── Content: title + category
+    const content = document.createElement('div');
+    content.className = 'sch-strip-content';
+    content.innerHTML = `
+      <div class="sch-strip-game-row">
+        <span class="sch-strip-game">${title}</span>
+      </div>
+      <span class="sch-strip-subtitle">${category}</span>
+    `;
+    strip.appendChild(content);
+
+    container.appendChild(strip);
   });
   contentArea.appendChild(container);
 }
+
 
 
 
@@ -684,7 +736,9 @@ export function initAppController({ renderScheduleCustom, onBeforeRenderContent 
 
   function scheduleNextMenuRotation() {
     clearTimeout(menuTimer);
-    menuTimer = setTimeout(rotateMenu, CONFIG.menuInterval);
+    const activeItem = MENU_ITEMS[currentMenuIndex];
+    const duration = MENU_DURATIONS[activeItem.id] || CONFIG.menuInterval;
+    menuTimer = setTimeout(rotateMenu, duration);
   }
 
   function rotateMenu() {

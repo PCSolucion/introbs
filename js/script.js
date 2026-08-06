@@ -5,8 +5,8 @@
    ═══════════════════════════════════════════════════════ */
 
 import {
-  SCHEDULE, DAY_NAMES, getDayKey, getWeekDates,
-  getGameImageSync, bindAsyncGameImage, isDescansoGame, preloadGameImage, parseStreamTime,
+  SCHEDULE, getDayKey, getWeekDates,
+  isDescansoGame, preloadGameImage, parseStreamTime,
   initAppController
 } from './engine.js';
 
@@ -16,71 +16,82 @@ console.log('[INTRO] Script inicializado');
   'use strict';
 
   // ─── RENDER: HORARIO (exclusivo de la intro) ──────────────
+  const DAY_ABBR = {
+    lunes: 'LUN', martes: 'MAR', miercoles: 'MIE',
+    jueves: 'JUE', viernes: 'VIE', sabado: 'SAB', domingo: 'DOM',
+  };
+
   function renderSchedule(contentArea) {
     const todayKey = getDayKey();
     const weekDates = getWeekDates();
 
-    const scheduleContainer = document.createElement('div');
-    scheduleContainer.className = 'content-view-container';
+    const container = document.createElement('div');
+    container.className = 'content-view-container sch-strips-container';
 
     Object.entries(SCHEDULE).forEach(([k, gamesList], i) => {
-      const active = k === todayKey;
+      const isToday = k === todayKey;
       const dateObj = weekDates[i];
-      const displayDate = active ? dateObj.day : `${dateObj.day} ${dateObj.month}`;
+      const isWeekendStart = k === 'sabado';
 
-      const dayRow = document.createElement('div');
-      dayRow.className = `sch-day-row feed-enter ${active ? 'active-day-row' : ''}`;
-      dayRow.style.animationDelay = `${i * 0.1}s`;
+      // Filter out DESCANSO games — only show actual streams
+      const actualGames = gamesList.filter(g => !isDescansoGame(g.game));
 
-      const dayLabel = document.createElement('div');
-      dayLabel.className = 'sch-day-label';
+      const strip = document.createElement('div');
+      strip.className = `sch-strip feed-enter${isToday ? ' sch-strip--active' : ''}${actualGames.length === 0 ? ' sch-strip--rest' : ''}${isWeekendStart ? ' sch-strip--weekend-sep' : ''}`;
+      strip.style.animationDelay = `${i * 0.08}s`;
 
-      const isMiercoles = k === 'miercoles';
-
-      dayLabel.innerHTML = `
-        <div class="sch-day-title ${isMiercoles ? 'is-miercoles' : ''}">
-          ${DAY_NAMES[k]} <span class="sch-day-date">${displayDate}</span>
-        </div>
-        ${active ? '<div class="sch-badge-today">HOY</div>' : ''}
+      // ── Day column
+      const dayCol = document.createElement('div');
+      dayCol.className = 'sch-strip-day';
+      dayCol.innerHTML = `
+        <span class="sch-strip-dayname">${DAY_ABBR[k] || k.toUpperCase()}</span>
+        <span class="sch-strip-date">${dateObj.day} ${dateObj.month}</span>
       `;
-      dayRow.appendChild(dayLabel);
+      strip.appendChild(dayCol);
 
-      const gamesCol = document.createElement('div');
-      gamesCol.className = 'sch-games-col';
+      // ── Vertical divider
+      const divider = document.createElement('div');
+      divider.className = 'sch-strip-divider';
+      strip.appendChild(divider);
 
-      gamesList.forEach(g => {
-        const gameCard = document.createElement('div');
-        gameCard.className = `sch-card ${active ? 'active-day' : ''}`;
+      // ── Content column
+      const content = document.createElement('div');
+      content.className = 'sch-strip-content';
 
-        const { startTimeStr, endTimeStr } = parseStreamTime(g.time);
+      if (actualGames.length === 0) {
+        // Rest-only day
+        const row = document.createElement('div');
+        row.className = 'sch-strip-game-row';
+        row.innerHTML = `<span class="sch-strip-game">DESCANSO</span>`;
+        content.appendChild(row);
+      } else {
+        actualGames.forEach(g => {
+          const { startTimeStr } = parseStreamTime(g.time);
+          const row = document.createElement('div');
+          row.className = 'sch-strip-game-row';
+          row.innerHTML = `
+            <span class="sch-strip-game">${g.game.toUpperCase()}</span>
+            <span class="sch-strip-time">${startTimeStr}</span>
+          `;
+          content.appendChild(row);
+        });
+      }
+      strip.appendChild(content);
 
-        const syncUrl = getGameImageSync(g.game);
-        const isDescanso = isDescansoGame(g.game);
+      // ── HOY badge (active day only)
+      if (isToday) {
+        const badge = document.createElement('span');
+        badge.className = 'sch-strip-today';
+        badge.textContent = 'HOY';
+        strip.appendChild(badge);
+      }
 
-        gameCard.innerHTML = `
-          <img class="sch-card-img sch-new-img ${isDescanso ? 'descanso' : ''}" data-game="${g.game}" data-active="${active}" src="${syncUrl}" style="${syncUrl ? 'opacity: 1; transform: scale(1.08);' : ''}">
-          <div class="sch-card-overlay"></div>
-          <div class="sch-card-content">
-            <div class="sch-card-title">${g.game}</div>
-            <div class="sch-card-badge">
-              <span class="sch-card-badge-time">${startTimeStr}</span>
-              ${endTimeStr ? `<span class="sch-card-badge-endtime">${endTimeStr}</span>` : ''}
-            </div>
-          </div>
-        `;
-        gamesCol.appendChild(gameCard);
-
-        if (!syncUrl) {
-          bindAsyncGameImage(gameCard.querySelector('.sch-card-img'), g.game);
-        }
-      });
-
-      dayRow.appendChild(gamesCol);
-      scheduleContainer.appendChild(dayRow);
+      container.appendChild(strip);
     });
 
-    contentArea.appendChild(scheduleContainer);
+    contentArea.appendChild(container);
   }
+
 
   // ─── INIT ─────────────────────────────────────────
   Object.values(SCHEDULE).flat().forEach(g => {

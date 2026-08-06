@@ -213,7 +213,7 @@ html, body {
 /* El panel es 480px de ancho. clip-path: polygon(0 0, 100% 0, 70% 100%, 0 100%) */
 #menuList .card-item:nth-child(1) { padding-right: 80px;  padding-left: 140px; text-align: right; justify-content: flex-end; }
 #menuList .card-item:nth-child(2) { padding-right: 103px; padding-left: 120px; text-align: right; justify-content: flex-end; }
-#menuList .card-item:nth-child(3) { padding-right: 126px; padding-left: 100px; text-align: right; justify-content: flex-end; }
+#menuList .card-item:nth-child(3) { padding-right: 115px; padding-left: 40px;  text-align: right; justify-content: flex-end; }
 #menuList .card-item:nth-child(4) { padding-right: 149px; padding-left: 80px;  text-align: right; justify-content: flex-end; }
 #menuList .card-item:nth-child(5) { padding-right: 172px; padding-left: 60px;  text-align: right; justify-content: flex-end; }
 #menuList .card-item:nth-child(6) { padding-right: 195px; padding-left: 50px;  text-align: right; justify-content: flex-end; }
@@ -279,6 +279,7 @@ html, body {
   font-size: 22px; font-weight: 700;
   letter-spacing: 3px;
   color: rgba(255,255,255,0.55);
+  white-space: nowrap;
 }
 .card-item.active .card-title {
   color: #fff;
@@ -1067,6 +1068,274 @@ html, body {
   justify-content: space-between;
   align-items: center;
   gap: 20px;
+}
+
+
+/* ═══════════════════
+   SCHEDULE STRIPS — Intro Horario Redesign
+   Tiras horizontales que replican la estética del sidebar
+   ═══════════════════ */
+
+.sch-strips-container {
+  justify-content: center !important;
+  gap: 2px;
+}
+
+.sch-strip {
+  display: flex;
+  align-items: center;
+  padding: 22px 28px;
+  background: rgba(255, 255, 255, 0.015);
+  border-left: 3px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  opacity: 0.45;
+}
+
+.sch-strip--active {
+  opacity: 1;
+  border-left: 4px solid var(--cyber-red);
+  background: rgba(var(--cyber-red-rgb), 0.15);
+  box-shadow: inset 4px 0 20px rgba(var(--cyber-red-rgb), 0.15),
+              0 0 40px rgba(var(--cyber-red-rgb), 0.05);
+  backdrop-filter: blur(6px);
+}
+
+.sch-strip--rest {
+  opacity: 0.18;
+}
+
+.sch-strip--weekend-sep {
+  margin-top: 32px;
+}
+
+/* Day column */
+.sch-strip-day {
+  width: 90px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.sch-strip-dayname {
+  font-family: var(--font-title);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 3px;
+}
+
+.sch-strip--active .sch-strip-dayname {
+  color: #fff;
+  text-shadow: 0 0 12px rgba(var(--cyber-red-rgb), 0.5);
+}
+
+.sch-strip-date {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.15);
+  letter-spacing: 1.5px;
+}
+
+.sch-strip--active .sch-strip-date {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Vertical divider */
+.sch-strip-divider {
+  width: 1px;
+  align-self: stretch;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 0 24px;
+  flex-shrink: 0;
+}
+
+.sch-strip--active .sch-strip-divider {
+  background: rgba(var(--cyber-red-rgb), 0.35);
+  box-shadow: 0 0 8px rgba(var(--cyber-red-rgb), 0.2);
+}
+
+/* Content column */
+.sch-strip-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.sch-strip-game-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.sch-strip-game {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sch-strip--active .sch-strip-game {
+  color: #fff;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
+}
+
+.sch-strip--rest .sch-strip-game {
+  font-style: italic;
+  letter-spacing: 4px;
+  font-size: 1rem;
+}
+
+/* Time badge */
+.sch-strip-time {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 2px;
+  padding: 5px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.sch-strip--active .sch-strip-time {
+  color: var(--cyber-red);
+  border-color: rgba(var(--cyber-red-rgb), 0.4);
+  background: rgba(var(--cyber-red-rgb), 0.08);
+  box-shadow: 0 0 10px rgba(var(--cyber-red-rgb), 0.15);
+}
+
+/* HOY badge */
+.sch-strip-today {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  background: var(--cyber-red);
+  color: #fff;
+  padding: 3px 10px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  box-shadow: 0 0 15px rgba(var(--cyber-red-rgb), 0.6);
+  margin-left: 16px;
+  flex-shrink: 0;
+  animation: todayPulse 2s ease-in-out infinite;
+}
+
+@keyframes todayPulse {
+  0%, 100% { box-shadow: 0 0 15px rgba(var(--cyber-red-rgb), 0.6); }
+  50% { box-shadow: 0 0 25px rgba(var(--cyber-red-rgb), 0.9), 0 0 40px rgba(var(--cyber-red-rgb), 0.3); }
+}
+
+/* Subtitle line (title in TOP, category in recent streams) */
+.sch-strip-subtitle {
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.18);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-top: -2px;
+}
+
+.sch-strip--active .sch-strip-subtitle {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Allow rank-change indicators inside strip date column */
+.sch-strip-date .rank-change-indicator {
+  margin-top: 0;
+  font-size: 0.8rem;
+}
+
+/* ═══════════════════
+   RANKED GRADIENT — Smooth fade via --si (0.0 → 1.0)
+   Used in TOP ranking. Every visual property scales linearly.
+   ═══════════════════ */
+.sch-strip--ranked {
+  --si: 0;
+  opacity: calc(0.45 + var(--si) * 0.55);
+  border-left: 3px solid rgba(129, 99, 246, calc(0.06 + var(--si) * 0.94));
+  background: rgba(129, 99, 246, calc(var(--si) * 0.15));
+}
+
+.sch-strip--ranked .sch-strip-dayname {
+  color: rgba(255, 255, 255, calc(0.35 + var(--si) * 0.65));
+  text-shadow: 0 0 calc(var(--si) * 12px) rgba(129, 99, 246, calc(var(--si) * 0.5));
+}
+
+.sch-strip--ranked .sch-strip-date {
+  color: rgba(255, 255, 255, calc(0.15 + var(--si) * 0.35));
+}
+
+.sch-strip--ranked .sch-strip-divider {
+  background: rgba(129, 99, 246, calc(0.06 + var(--si) * 0.29));
+}
+
+.sch-strip--ranked .sch-strip-game {
+  color: rgba(255, 255, 255, calc(0.35 + var(--si) * 0.65));
+}
+
+.sch-strip--ranked .sch-strip-time {
+  color: rgba(129, 99, 246, calc(0.25 + var(--si) * 0.75));
+  border-color: rgba(129, 99, 246, calc(0.06 + var(--si) * 0.34));
+  background: rgba(129, 99, 246, calc(var(--si) * 0.08));
+}
+
+.sch-strip--ranked .sch-strip-subtitle {
+  color: rgba(255, 255, 255, calc(0.18 + var(--si) * 0.27));
+}
+
+/* ═══════════════════
+   SIDE-BY-SIDE USER STATS (TOP RANKING)
+   ═══════════════════ */
+.sch-strip-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  margin-top: 1px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.sch-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sch-stat-lbl {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
+}
+
+.sch-stat-val {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: bold;
+}
+
+.sch-stat-sep {
+  color: rgba(var(--cyber-red-rgb), 0.3);
+  font-size: 0.75rem;
+  user-select: none;
+}
+
+.sch-strip--ranked .sch-stat-val {
+  color: rgba(255, 255, 255, calc(0.35 + var(--si) * 0.55));
+}
+
+.sch-strip--ranked .sch-stat-lbl {
+  color: rgba(255, 255, 255, calc(0.18 + var(--si) * 0.27));
 }
 
 
