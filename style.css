@@ -946,6 +946,101 @@ html, body {
   box-shadow: var(--glow-red);
 }
 
+/* ─── OUTRO COMPACT HUD CARD (SIN IMAGEN DE FONDO) ─── */
+.sch-outro-compact-card {
+  position: relative;
+  background: rgba(10, 10, 18, 0.75);
+  border: 1px solid rgba(var(--cyber-red-rgb), 0.5);
+  border-left: 4px solid var(--cyber-red);
+  backdrop-filter: blur(10px);
+  padding: 22px 28px;
+  clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+  box-shadow: 0 0 25px rgba(var(--cyber-red-rgb), 0.25), inset 0 0 20px rgba(var(--cyber-red-rgb), 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.sch-outro-compact-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 2px;
+  background: var(--cyber-red);
+  box-shadow: 0 0 10px var(--cyber-red);
+}
+
+.sch-outro-compact-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.sch-outro-compact-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sch-outro-compact-tag {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--cyber-red);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+}
+
+.sch-outro-compact-title {
+  font-family: var(--font-title);
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sch-outro-compact-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-shrink: 0;
+}
+
+.sch-outro-compact-date {
+  font-family: var(--font-ui);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+
+.sch-outro-compact-time {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--cyber-red);
+  background: rgba(var(--cyber-red-rgb), 0.2);
+  border: 1px solid var(--cyber-red);
+  padding: 8px 18px;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  box-shadow: var(--glow-red);
+}
+
 .sch-countdown-container {
   display: flex;
   flex-direction: column;
@@ -1059,7 +1154,7 @@ html, body {
 }
 
 .sch-outro-container {
-  gap: 25px;
+  gap: 16px;
   justify-content: center;
 }
 

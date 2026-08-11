@@ -13,6 +13,14 @@ import {
 
 console.log('[OUTRO ENGINE] Script inicializado');
 
+// Limpiar cachés obsoletos de APIs anteriores (RAWG/IGDB/SteamSpy) para forzar
+// que la nueva lógica de Steam Store Search arranque sin entradas NOT_FOUND viejas.
+['introbs_rawg_image_cache_v1', 'introbs_rawg_image_cache_v2',
+ 'introbs_igdb_image_cache_v1', 'introbs_steam_image_cache_v1'].forEach(k => {
+  localStorage.removeItem(k);
+});
+
+
 (function () {
   'use strict';
 
@@ -70,68 +78,46 @@ console.log('[OUTRO ENGINE] Script inicializado');
     const container = document.createElement('div');
     container.className = 'content-view-container feed-enter sch-outro-container';
 
-    // Cabecera
+    // Cabecera HUD
     const headerEl = document.createElement('div');
     headerEl.className = 'sch-outro-header';
     headerEl.textContent = '// ENLACE_NEURAL: SIGUIENTE TRANSMISION';
     container.appendChild(headerEl);
 
-    // Obtener la URL sincrónicamente (sin retardo)
-    const syncUrl = getGameImageSync(stream.game);
-    const isDescanso = isDescansoGame(stream.game);
-
-    // Caja de juego
+    // Tarjeta compacta HUD (diseño Cyberpunk 2077 puro, sin imagen de fondo)
     const gameDisplay = document.createElement('div');
-    gameDisplay.className = 'sch-card active-day outro-version';
+    gameDisplay.className = 'sch-outro-compact-card';
 
     gameDisplay.innerHTML = `
-      <img class="sch-card-img sch-new-img ${isDescanso ? 'descanso' : ''}" data-game="${stream.game}" src="${syncUrl}" style="${syncUrl ? 'opacity: 0.55; transform: scale(1.06);' : ''}">
-      <div class="sch-card-overlay"></div>
-      <div class="sch-card-content">
-        <h2 class="sch-outro-game-title">
-          ${stream.game}
-        </h2>
-        <div class="sch-card-footer">
-          <span class="sch-outro-date">
-            ${formattedDay}
-          </span>
-          <span class="sch-outro-time-badge">
-            ${startTimeStr}
-          </span>
+      <div class="sch-outro-compact-body">
+        <div class="sch-outro-compact-left">
+          <span class="sch-outro-compact-tag">PROXIMA TRANSMISION // TARGET</span>
+          <h2 class="sch-outro-compact-title">${stream.game}</h2>
+        </div>
+        <div class="sch-outro-compact-right">
+          <span class="sch-outro-compact-date">${formattedDay}</span>
+          <span class="sch-outro-compact-time">${startTimeStr}</span>
         </div>
       </div>
     `;
     container.appendChild(gameDisplay);
 
-    // Fallback asíncrono si la imagen no estaba en la caché sincrónica inicial
-    if (!syncUrl) {
-      bindAsyncGameImage(gameDisplay.querySelector('.sch-card-img'), stream.game, '0.55', 'scale(1.06)');
-    }
-
     // Caja countdown
     const countdownBox = document.createElement('div');
     countdownBox.className = 'sch-countdown-container';
     countdownBox.innerHTML = `
-      <span class="sch-countdown-label">
-        TIEMPO PARA EL ENLACE
-      </span>
-      <div id="countdownClock" class="sch-countdown-clock">
-        00d : 00h : 00m : 00s
-      </div>
+      <span class="sch-countdown-label">TIEMPO PARA EL ENLACE</span>
+      <div id="countdownClock" class="sch-countdown-clock">00d : 00h : 00m : 00s</div>
     `;
     container.appendChild(countdownBox);
 
     // Texto de despedida
     const bottomLog = document.createElement('div');
     bottomLog.className = 'sch-outro-footer';
-
-    const logIndicator = document.createElement('span');
-    logIndicator.className = 'sch-outro-pulse-indicator';
-
-    bottomLog.appendChild(logIndicator);
-    const textSpan = document.createElement('span');
-    textSpan.textContent = 'GRACIAS POR ACOMPANARME EN EL VIAJE, CHOOMS_';
-    bottomLog.appendChild(textSpan);
+    bottomLog.innerHTML = `
+      <span class="sch-outro-pulse-indicator"></span>
+      <span>GRACIAS POR ACOMPANARME EN EL VIAJE, CHOOMS_</span>
+    `;
     container.appendChild(bottomLog);
 
     contentArea.appendChild(container);

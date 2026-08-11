@@ -5,7 +5,6 @@
 
 import { db } from './firebase.js';
 import { collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js';
-import { RAWG_API_KEY } from './api-keys.js';
 import { SCHEDULE } from './schedule.js';
 
 export { SCHEDULE };
@@ -70,14 +69,72 @@ export const storage = {
 };
 
 const gameImageCache = {};
-const RAWG_CACHE_KEY = 'introbs_rawg_image_cache_v1';
+const STEAM_CACHE_KEY = 'introbs_steam_image_cache_v1';
+const STEAM_NOT_FOUND_TTL = 24 * 60 * 60 * 1000; // 24h — reintenta después
 
-function getRawgCache() {
-  return storage.get(RAWG_CACHE_KEY, {});
+const IGDB_CLIENT_ID = 'o2nod5eq628ebxttkeqo50ljyonim9';
+const IGDB_SECRET = 'o2nod5eq628ebxttkeqo50ljyonim9';
+let igdbToken = null;
+
+async function getIgdbToken() {
+  if (igdbToken) return igdbToken;
+  try {
+    const authUrl = `https://id.twitch.tv/oauth2/token?client_id=${IGDB_CLIENT_ID}&client_secret=${IGDB_SECRET}&grant_type=client_credentials`;
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(authUrl)}`;
+    const res = await fetch(proxyUrl, { method: 'POST' });
+    const data = await res.json();
+    if (data && data.access_token) {
+      igdbToken = data.access_token;
+      return igdbToken;
+    }
+  } catch (e) {
+    console.warn('[IGDB] Error obteniendo token:', e);
+  }
+  return null;
 }
 
-function saveRawgCache(cache) {
-  storage.set(RAWG_CACHE_KEY, cache);
+async function fetchIgdbCover(gameName) {
+  try {
+    const token = await getIgdbToken();
+    if (!token) return null;
+
+    const apiUrl = 'https://api.igdb.com/v4/games';
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
+    const body = `search "${gameName}"; fields name,cover.image_id; limit 5;`;
+
+    const res = await fetch(proxyUrl, {
+      method: 'POST',
+      headers: {
+        'Client-ID': IGDB_CLIENT_ID,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'text/plain'
+      },
+      body: body
+    });
+
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      const cleanTarget = gameName.toLowerCase().trim();
+      // Coincidencia exacta por nombre primero para evitar juegos equivocados de la saga
+      let best = data.find(g => g.name && g.name.toLowerCase() === cleanTarget && g.cover && g.cover.image_id);
+      if (!best) best = data.find(g => g.cover && g.cover.image_id);
+
+      if (best && best.cover && best.cover.image_id) {
+        return `https://images.igdb.com/igdb/image/upload/t_1080p/${best.cover.image_id}.jpg`;
+      }
+    }
+  } catch (e) {
+    console.warn('[IGDB] Error buscando carátula:', e);
+  }
+  return null;
+}
+
+function getSteamCache() {
+  return storage.get(STEAM_CACHE_KEY, {});
+}
+
+function saveSteamCache(cache) {
+  storage.set(STEAM_CACHE_KEY, cache);
 }
 
 export async function preloadGameImage(gameName) {
@@ -90,11 +147,8 @@ export async function preloadGameImage(gameName) {
 }
 
 export const SPECIAL_GAMES = {
-  DESCANSO: { image: 'fondos/descanso.png', isDescanso: true },
+  DESCANSO:    { image: 'fondos/descanso.png', isDescanso: true },
   INFORMATICA: { image: 'fondos/informatica-bg.jpg' },
-  'BEAST OF REINCARNATION': { image: 'https://gameinformer.com/sites/default/files/styles/content_header_l/public/2026/07/31/1cdb0ec4/bor_keyart_4k.jpg.webp' },
-  'DEAD SPACE REMAKE': { image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1693980/capsule_616x353.jpg?t=1777396576' },
-  'DEAD SPACE': { image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1693980/capsule_616x353.jpg?t=1777396576' },
 };
 
 export function isDescansoGame(gameName) {
@@ -113,10 +167,22 @@ export function getGameImageSync(gameName) {
     return gameImageCache[cleanName] === 'NOT_FOUND' ? '' : gameImageCache[cleanName];
   }
 
-  const diskCache = getRawgCache();
-  if (diskCache[cleanName]) {
-    gameImageCache[cleanName] = diskCache[cleanName];
-    return diskCache[cleanName] === 'NOT_FOUND' ? '' : diskCache[cleanName];
+  const diskCache = getSteamCache();
+  const entry = diskCache[cleanName];
+  if (entry) {
+    if (typeof entry === 'object') {
+      if (entry.url === 'NOT_FOUND') {
+        if (Date.now() - (entry.ts || 0) > STEAM_NOT_FOUND_TTL) return '';
+        gameImageCache[cleanName] = 'NOT_FOUND';
+        return '';
+      }
+      gameImageCache[cleanName] = entry.url;
+      return entry.url;
+    } else {
+      if (entry === 'NOT_FOUND') return '';
+      gameImageCache[cleanName] = entry;
+      return entry;
+    }
   }
 
   return '';
@@ -127,10 +193,8 @@ export function bindAsyncGameImage(imgEl, gameName, targetOpacity = '1', targetS
   getGameImage(gameName).then(url => {
     if (url) {
       imgEl.src = url;
-      setTimeout(() => {
-        imgEl.style.opacity = targetOpacity;
-        imgEl.style.transform = targetScale;
-      }, 50);
+      imgEl.style.opacity = targetOpacity;
+      imgEl.style.transform = targetScale;
     }
   });
 }
@@ -141,30 +205,66 @@ export async function getGameImage(gameName) {
   if (syncUrl) return syncUrl;
 
   const cleanName = gameName.trim();
+  if (gameImageCache[cleanName] === 'NOT_FOUND') return '';
 
+  // 1. Steam Store Search vía api.allorigins.win (Proxy fiable de Cloudflare)
   try {
-    const res = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`);
-    const data = await res.json();
-    if (data.results && data.results.length > 0 && data.results[0].background_image) {
-      const imgUrl = data.results[0].background_image;
-      gameImageCache[cleanName] = imgUrl;
-      const diskCache = getRawgCache();
-      diskCache[cleanName] = imgUrl;
-      saveRawgCache(diskCache);
-      return imgUrl;
+    const steamUrl = `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(cleanName)}&l=spanish&cc=ES`;
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(steamUrl)}`;
+    const res = await fetch(proxyUrl);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.contents) {
+        const parsed = JSON.parse(data.contents);
+        if (parsed && parsed.items && parsed.items.length > 0) {
+          const appId = parsed.items[0].id;
+          // library_600x900_2x.jpg = Carátula vertical oficial de alta resolución en Steam
+          const imgUrl = `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/library_600x900_2x.jpg`;
+          gameImageCache[cleanName] = imgUrl;
+          const diskCache = getSteamCache();
+          diskCache[cleanName] = { url: imgUrl, ts: Date.now() };
+          saveSteamCache(diskCache);
+          console.log(`[STEAM COVER] "${cleanName}" → AppID ${appId} → ${imgUrl}`);
+          return imgUrl;
+        }
+      }
     }
   } catch (e) {
-    console.error('Error fetching game image from RAWG API', e);
+    console.warn(`[STEAM COVER] Error para "${cleanName}":`, e);
   }
 
-  // Si no se encontró o hubo error, guardar NOT_FOUND para no saturar la API en futuras peticiones
+  // 2. Fallback: Wikipedia API (origin=* nativo sin proxies)
+  try {
+    const wikiUrl = `https://es.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrsearch=${encodeURIComponent(cleanName + ' videojuego')}&gsrlimit=1&prop=pageimages&piprop=thumbnail&pithumbsize=1000`;
+    const res = await fetch(wikiUrl);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.query && data.query.pages) {
+        const pages = Object.values(data.query.pages);
+        if (pages.length > 0 && pages[0].thumbnail && pages[0].thumbnail.source) {
+          const imgUrl = pages[0].thumbnail.source;
+          gameImageCache[cleanName] = imgUrl;
+          const diskCache = getSteamCache();
+          diskCache[cleanName] = { url: imgUrl, ts: Date.now() };
+          saveSteamCache(diskCache);
+          console.log(`[WIKI COVER] "${cleanName}" → ${imgUrl}`);
+          return imgUrl;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn(`[WIKI COVER] Error para "${cleanName}":`, e);
+  }
+
+  // Marcar como NOT_FOUND
   gameImageCache[cleanName] = 'NOT_FOUND';
-  const diskCache = getRawgCache();
-  diskCache[cleanName] = 'NOT_FOUND';
-  saveRawgCache(diskCache);
+  const diskCache = getSteamCache();
+  diskCache[cleanName] = { url: 'NOT_FOUND', ts: Date.now() };
+  saveSteamCache(diskCache);
 
   return '';
 }
+
 
 // ─── MENÚ ────────────────────────────────────────────
 export const MENU_ITEMS = [
