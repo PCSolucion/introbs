@@ -72,62 +72,7 @@ const gameImageCache = {};
 const STEAM_CACHE_KEY = 'introbs_steam_image_cache_v1';
 const STEAM_NOT_FOUND_TTL = 24 * 60 * 60 * 1000; // 24h — reintenta después
 
-const IGDB_CLIENT_ID = 'o2nod5eq628ebxttkeqo50ljyonim9';
-const IGDB_SECRET = 'o2nod5eq628ebxttkeqo50ljyonim9';
-let igdbToken = null;
 
-async function getIgdbToken() {
-  if (igdbToken) return igdbToken;
-  try {
-    const authUrl = `https://id.twitch.tv/oauth2/token?client_id=${IGDB_CLIENT_ID}&client_secret=${IGDB_SECRET}&grant_type=client_credentials`;
-    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(authUrl)}`;
-    const res = await fetch(proxyUrl, { method: 'POST' });
-    const data = await res.json();
-    if (data && data.access_token) {
-      igdbToken = data.access_token;
-      return igdbToken;
-    }
-  } catch (e) {
-    console.warn('[IGDB] Error obteniendo token:', e);
-  }
-  return null;
-}
-
-async function fetchIgdbCover(gameName) {
-  try {
-    const token = await getIgdbToken();
-    if (!token) return null;
-
-    const apiUrl = 'https://api.igdb.com/v4/games';
-    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
-    const body = `search "${gameName}"; fields name,cover.image_id; limit 5;`;
-
-    const res = await fetch(proxyUrl, {
-      method: 'POST',
-      headers: {
-        'Client-ID': IGDB_CLIENT_ID,
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'text/plain'
-      },
-      body: body
-    });
-
-    const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) {
-      const cleanTarget = gameName.toLowerCase().trim();
-      // Coincidencia exacta por nombre primero para evitar juegos equivocados de la saga
-      let best = data.find(g => g.name && g.name.toLowerCase() === cleanTarget && g.cover && g.cover.image_id);
-      if (!best) best = data.find(g => g.cover && g.cover.image_id);
-
-      if (best && best.cover && best.cover.image_id) {
-        return `https://images.igdb.com/igdb/image/upload/t_1080p/${best.cover.image_id}.jpg`;
-      }
-    }
-  } catch (e) {
-    console.warn('[IGDB] Error buscando carátula:', e);
-  }
-  return null;
-}
 
 function getSteamCache() {
   return storage.get(STEAM_CACHE_KEY, {});
