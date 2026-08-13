@@ -88,7 +88,11 @@ export function initAppController({ renderScheduleCustom, onBeforeRenderContent 
     allUsers = users;
     updateRankingHistory(users);
     recentStreams = streams;
-    renderActiveContent();
+    const activeItem = MENU_ITEMS[currentMenuIndex];
+    // Evitar parpadeo/doble animación: el horario no depende de Firestore/caché
+    if (activeItem && activeItem.id !== 'horario') {
+      renderActiveContent();
+    }
   }
 
   async function loadUsers() {
