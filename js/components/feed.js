@@ -3,14 +3,34 @@ import { getUserId, formatDisplayName, formatNum, formatTime } from '../core/uti
 import { getTitle } from '../core/constants.js';
 import { renderPlaceholder } from './placeholder.js';
 
-export function getRankChangeBadge(prevRankIndex, currentRank) {
-  if (prevRankIndex === -1) {
+function getTodayDateString() {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function formatDeltaTime(minutes) {
+  if (!minutes || minutes <= 0) return '';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h > 0 && m > 0) return `+${h}h ${m}m`;
+  if (h > 0) return `+${h}h`;
+  return `+${m}m`;
+}
+
+export function getRankChangeBadge(prevRank, currentRank, hasHistory = true) {
+  if (!hasHistory) {
+    return `<span class="rank-change-indicator rank-equal">&minus;</span>`;
+  }
+  if (!prevRank || prevRank === -1) {
     return `<span class="rank-change-indicator rank-new">NEW</span>`;
   }
-  const diff = (prevRankIndex + 1) - currentRank;
+  const diff = prevRank - currentRank;
   if (diff > 0) return `<span class="rank-change-indicator rank-up">&#9650; ${diff}</span>`;
   if (diff < 0) return `<span class="rank-change-indicator rank-down">&#9660; ${Math.abs(diff)}</span>`;
-  return `<span class="rank-change-indicator rank-equal">EQ</span>`;
+  return `<span class="rank-change-indicator rank-equal">&minus;</span>`;
 }
 
 export function getTopRankedUsers(users, limit = 10) {
@@ -28,21 +48,52 @@ export function getRankedUserIds(users) {
   return getTopRankedUsers(users, 0).map(u => getUserId(u));
 }
 
-export function updateRankingHistory(users) {
-  const currentRankedIds = getRankedUserIds(users);
-  const storedCurr = storage.get('introbs_curr_ranking', null);
+export function getPreviousDailySnapshot() {
+  const today = getTodayDateString();
+  const snapshots = storage.get('introbs_daily_snapshots', {});
+  const dates = Object.keys(snapshots)
+    .filter(d => d < today)
+    .sort();
 
-  if (!storedCurr) {
-    storage.set('introbs_curr_ranking', currentRankedIds);
-    storage.set('introbs_prev_ranking', currentRankedIds);
-  } else {
-    const isDifferent = storedCurr.length !== currentRankedIds.length ||
-      currentRankedIds.some((id, idx) => id !== storedCurr[idx]);
-    if (isDifferent) {
-      storage.set('introbs_prev_ranking', storedCurr);
-      storage.set('introbs_curr_ranking', currentRankedIds);
+  if (dates.length === 0) return null;
+  const latestPrevDate = dates[dates.length - 1];
+  return snapshots[latestPrevDate] || null;
+}
+
+export function updateRankingHistory(users) {
+  if (!Array.isArray(users) || users.length === 0) return;
+
+  const today = getTodayDateString();
+  const snapshots = storage.get('introbs_daily_snapshots', {});
+
+  // Limpiar snapshots con más de 7 días de antigüedad
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const cutoffStr = sevenDaysAgo.toISOString().slice(0, 10);
+
+  const cleaned = {};
+  for (const dateKey of Object.keys(snapshots).sort()) {
+    if (dateKey >= cutoffStr) {
+      cleaned[dateKey] = snapshots[dateKey];
     }
   }
+
+  // Generar snapshot actual
+  const currentSnapshot = {};
+  const allRanked = getTopRankedUsers(users, 0);
+  allRanked.forEach((u, index) => {
+    const uid = getUserId(u);
+    currentSnapshot[uid] = {
+      rank: index + 1,
+      xp: u.xp || 0,
+      msgs: u.totalMessages || u.messagesCount || u.messages || 0,
+      watch: u.watchTimeMinutes || u.watchTime || 0,
+      level: u.level || 1
+    };
+  });
+
+  cleaned[today] = currentSnapshot;
+  storage.set('introbs_daily_snapshots', cleaned);
 }
 
 export function renderFeed(contentArea, allUsers) {
@@ -52,7 +103,8 @@ export function renderFeed(contentArea, allUsers) {
   }
 
   const top10 = getTopRankedUsers(allUsers, 10);
-  const prevRankingArray = storage.get('introbs_prev_ranking', []);
+  const prevSnapshot = getPreviousDailySnapshot();
+  const hasHistory = prevSnapshot !== null;
 
   const feedContainer = document.createElement('div');
   feedContainer.className = 'content-view-container sch-strips-container';
@@ -60,11 +112,12 @@ export function renderFeed(contentArea, allUsers) {
   top10.forEach((u, i) => {
     const name = formatDisplayName(u);
     const lvl = u.level || 1;
-
     const currentUserId = getUserId(u);
     const currentRank = i + 1;
-    const prevRankIndex = prevRankingArray.indexOf(currentUserId);
-    const changeHTML = getRankChangeBadge(prevRankIndex, currentRank);
+
+    const prevUser = prevSnapshot ? prevSnapshot[currentUserId] : null;
+    const prevRank = prevUser ? prevUser.rank : -1;
+    const changeHTML = getRankChangeBadge(prevRank, currentRank, hasHistory);
 
     const xp = u.xp || 0;
     const msgs = u.totalMessages || u.messagesCount || u.messages || 0;
@@ -72,13 +125,24 @@ export function renderFeed(contentArea, allUsers) {
     const watch = u.watchTimeMinutes || u.watchTime || 0;
     const boost = (1 + Math.min(1.5, (streak * 0.05) + (lvl * 0.01))).toFixed(1);
 
+    // Comparativa diaria de estadísticas
+    const deltaXP = prevUser ? (xp - (prevUser.xp || 0)) : 0;
+    const deltaMsgs = prevUser ? (msgs - (prevUser.msgs || 0)) : 0;
+    const deltaWatch = prevUser ? (watch - (prevUser.watch || 0)) : 0;
+    const deltaLevel = prevUser ? (lvl - (prevUser.level || 1)) : 0;
+
+    const xpDeltaHTML = deltaXP > 0 ? ` <span class="stat-delta stat-delta--up">+${formatNum(deltaXP)}</span>` : '';
+    const msgsDeltaHTML = deltaMsgs > 0 ? ` <span class="stat-delta stat-delta--up">+${formatNum(deltaMsgs)}</span>` : '';
+    const watchDeltaHTML = deltaWatch > 0 ? ` <span class="stat-delta stat-delta--up">${formatDeltaTime(deltaWatch)}</span>` : '';
+    const lvlDeltaHTML = deltaLevel > 0 ? ` <span class="stat-delta stat-delta--lvl">+${deltaLevel}</span>` : '';
+
     const statsList = [
-      `<span class="sch-stat"><span class="sch-stat-lbl">XP</span> <span class="sch-stat-val">${formatNum(xp)}</span></span>`,
-      `<span class="sch-stat"><span class="sch-stat-lbl">CHAT</span> <span class="sch-stat-val">${formatNum(msgs)} MSG</span></span>`,
+      `<span class="sch-stat"><span class="sch-stat-lbl">XP</span> <span class="sch-stat-val">${formatNum(xp)}</span>${xpDeltaHTML}</span>`,
+      `<span class="sch-stat"><span class="sch-stat-lbl">CHAT</span> <span class="sch-stat-val">${formatNum(msgs)} MSG</span>${msgsDeltaHTML}</span>`,
       `<span class="sch-stat"><span class="sch-stat-lbl">BOOST</span> <span class="sch-stat-val">x${boost}</span></span>`,
     ];
     if (watch > 0) {
-      statsList.push(`<span class="sch-stat"><span class="sch-stat-lbl">TIEMPO</span> <span class="sch-stat-val">${formatTime(watch)}</span></span>`);
+      statsList.push(`<span class="sch-stat"><span class="sch-stat-lbl">TIEMPO</span> <span class="sch-stat-val">${formatTime(watch)}</span>${watchDeltaHTML}</span>`);
     }
 
     const statsHTML = statsList.join('<span class="sch-stat-sep">//</span>');
@@ -107,7 +171,7 @@ export function renderFeed(contentArea, allUsers) {
     content.innerHTML = `
       <div class="sch-strip-game-row">
         <span class="sch-strip-game">${name}</span>
-        <span class="sch-strip-time">LVL ${lvl}</span>
+        <span class="sch-strip-time">LVL ${lvl}${lvlDeltaHTML}</span>
       </div>
       <div class="sch-strip-stats">${statsHTML}</div>
     `;

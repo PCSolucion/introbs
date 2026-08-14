@@ -585,6 +585,66 @@ html, body {
   color: rgba(255, 255, 255, calc(0.18 + var(--si) * 0.27));
 }
 
+/* Indicadores de cambio de ranking diario */
+.rank-change-indicator {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 1px 3px;
+  border-radius: 2px;
+}
+
+.rank-change-indicator.rank-up {
+  color: var(--cyber-cyan);
+  text-shadow: 0 0 6px rgba(var(--cyber-cyan-rgb), 0.4);
+}
+
+.rank-change-indicator.rank-down {
+  color: rgba(255, 100, 100, 0.75);
+}
+
+.rank-change-indicator.rank-equal {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.rank-change-indicator.rank-new {
+  color: var(--cyber-yellow);
+  font-size: 0.65rem;
+  padding: 0 3px;
+  border: 1px solid rgba(var(--cyber-yellow-rgb), 0.3);
+  background: rgba(var(--cyber-yellow-rgb), 0.08);
+}
+
+/* Deltas diarios en estadísticas (+MSG, +TIEMPO, +XP, +LVL) */
+.stat-delta {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+  padding: 0 3px;
+  border-radius: 2px;
+  font-weight: normal;
+  line-height: 1.2;
+}
+
+.stat-delta--up {
+  color: var(--cyber-cyan);
+  background: rgba(var(--cyber-cyan-rgb), 0.08);
+  border: 1px solid rgba(var(--cyber-cyan-rgb), 0.22);
+}
+
+.stat-delta--lvl {
+  color: var(--cyber-yellow);
+  background: rgba(var(--cyber-yellow-rgb), 0.1);
+  border: 1px solid rgba(var(--cyber-yellow-rgb), 0.28);
+  font-size: 0.68rem;
+  margin-left: 4px;
+}
+
 /* ─── 9. PLACEHOLDER CARD ─── */
 .placeholder-card {
   padding: 60px 30px;
